@@ -4,11 +4,11 @@ const { notify } = require('../routes/authRoutes');
 
 const firstName = body('firstName').trim()
 .exists().withMessage('enter your first name')
-.isAlphanumeric().withMessage('Name should be letters or / and characters only');
+.isAlphanumeric().withMessage('firstName should be letters or / and characters only');
 
 const lastName = body('lastName').trim()
 .exists().withMessage('enter your last name')
-.isAlphanumeric().withMessage('Name should be letters or / and characters only');
+.isAlphanumeric().withMessage('lastName should be letters or / and characters only');
 
 const name2 = body('name').trim()
 .not().isEmpty().withMessage("please enter name")

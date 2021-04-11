@@ -116,7 +116,7 @@ exports.filter = async (req, res, nxt) => {
         //hold data
         const name = req.body.name; 
         let user = await userModel.find({$or : [{firstName: {$regex : `.*${name}.*`}}, {lastName: {$regex : `.*${name}.*`}}]})
-        .select('name email verified role pic gender DOB summary bio socialLinks')
+        .select('firstName lastName email verified role pic gender DOB summary bio socialLinks')
             if (!user) {
                 return res.status(404).json({
                     message: "user not found"
