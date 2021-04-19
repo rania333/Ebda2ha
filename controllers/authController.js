@@ -16,6 +16,7 @@ exports.signUp = async (req, res, nxt) => {
         });
     }
     //hold data from parsing body
+    const confirmPassword = req.body.confirm;
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
     const email = req.body.email;
@@ -23,6 +24,11 @@ exports.signUp = async (req, res, nxt) => {
     const role = req.body.role;
     const pic = data.DOMAIN + 'defaultPhoto.png';
     const code = rendomBytes.randomBytes(20).toString('hex'); //ll verification
+    if(pass !== confirmPassword) {
+        return res.status(401).json({
+            message: "password is not matched "
+        });
+    }
     //encrypt password
     let hashedPass = await bcrypt.hash(pass, 12)
     //add to DB

@@ -64,6 +64,10 @@ const userModel = new schema({
         type:String,
         required:false
     },
+    categories: [{
+        type: schema.Types.ObjectId,
+        ref: 'Category'
+    }],
     // resetPassExpiresIn: {
     //     type:Date,
     //     required:false
@@ -82,4 +86,4 @@ const userModel = new schema({
 userModel.methods.getUserInfo = function() {
     return pick(this, ["_id", "name", "email", "verified"]);
 }
-module.exports = mongoose.model('user', userModel);
+module.exports = mongoose.model('User', userModel);
