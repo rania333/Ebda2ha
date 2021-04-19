@@ -1,12 +1,16 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+
 const path = require('path');
 const cors= require('cors');
-const mongoose = require('mongoose');
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
+
 const data = require('./data');
 const uploads = require('./middleware/fileUpload');
+
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 
 const app = express();
 
@@ -28,6 +32,7 @@ app.use((req, res, nxt) => {
 /* start routes */
 app.use('/auth', authRoutes);
 app.use('/profile', userRoutes);
+app.use('/category', categoryRoutes);
 /* end routes */
 
 /* start database & server */
