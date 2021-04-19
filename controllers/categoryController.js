@@ -3,7 +3,7 @@ const User = require('../models/userModel');
 
 exports.getAllCategory = async(req, res, next) => {
     try{
-        const categories = await Category.find()
+        const categories = await Category.find().select('name')
         .populate('adminId')
         res.status(200).json({
             message: 'Fetched all data successfully',
@@ -20,7 +20,7 @@ exports.getAllCategory = async(req, res, next) => {
 
 exports.getCategory = async(req, res, next) => {
     const categoryId = req.params.categoryId;
-    const category = await Category.findById(categoryId)
+    const category = await Category.findById(categoryId).select('name')
          .populate('adminId')
     try{
         if(!category) {
