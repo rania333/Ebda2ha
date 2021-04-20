@@ -1,5 +1,6 @@
 const Category = require('../models/categoryModel');
 const User = require('../models/userModel');
+const {validationResult} = require('express-validator');
 
 exports.getAllCategory = async(req, res, next) => {
     try{
@@ -46,6 +47,15 @@ exports.getCategory = async(req, res, next) => {
 }
 
 exports.AddCategory = async(req, res, next) => {
+
+    //validation
+    const errors = await validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({
+            errors: errors.array()
+        });
+    }
+
     const name = req.body.name;
     const category = new Category({
         name: name,
@@ -72,6 +82,15 @@ exports.AddCategory = async(req, res, next) => {
 
 
 exports.updateCategory = async (req, res, next) => {
+
+    //validation
+    const errors = await validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({
+            errors: errors.array()
+        });
+    }
+    
     const categoryId = req.params.categoryId;
     const name = req.body.name;
     try {
