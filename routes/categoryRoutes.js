@@ -1,7 +1,7 @@
 const express = require('express');
 
 const categoryController = require('../controllers/categoryController');
-
+const validation = require('../validations/categoryValidation');
 const isAuth = require('../middleware/isAuth');
 const isAdmin = require('../middleware/isAdmin');
 
@@ -11,9 +11,9 @@ router.get('/', isAuth, isAdmin, categoryController.getAllCategory); //get all c
 
 router.get('/:categoryId', isAuth, isAdmin, categoryController.getCategory); //get single category
 
-router.post('/', isAuth, isAdmin, categoryController.AddCategory); //create
+router.post('/', isAuth, isAdmin, validation.addCategoryValidation, categoryController.AddCategory); //create
 
-router.put('/:categoryId', isAuth, isAdmin, categoryController.updateCategory); //update
+router.put('/:categoryId', isAuth, isAdmin, validation.updateCategoryValidation, categoryController.updateCategory); //update
 
 router.delete('/:categoryId', isAuth, isAdmin, categoryController.deleteCategory); //delete
 
