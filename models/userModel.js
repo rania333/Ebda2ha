@@ -51,7 +51,6 @@ const userModel = new schema({
             type: String
         }
     },
-    //mn l youtube
     verified: {
         type: Boolean,
         default: false
@@ -64,19 +63,13 @@ const userModel = new schema({
         type:String,
         required:false
     },
-    categories: [{
+    posts: [{
         type: schema.Types.ObjectId,
-        ref: 'Category'
+        ref: 'post'
     }],
-    // resetPassExpiresIn: {
-    //     type:Date,
-    //     required:false
-    // }
-    // favourite: {
-    //     posts: [{
-    //         postId: {type: schema.Types.ObjectId, ref:'post', required: true},
-    //     }]
-    // }
+    interests: [{
+        type: String
+    }]
 }, {
     timestamps: true
 });
@@ -84,6 +77,6 @@ const userModel = new schema({
 //methods
 
 userModel.methods.getUserInfo = function() {
-    return pick(this, ["_id", "name", "email", "verified"]);
+    return pick(this, ["_id", "firstName", "lastName", "email", "verified"]);
 }
 module.exports = mongoose.model('User', userModel);

@@ -26,10 +26,6 @@ const email = body('email')
     })
 }).normalizeEmail();
 
-const role = body('role').trim()
-.exists().withMessage('enter role')
-.isAlpha().withMessage('Role should be letters only');
-
 const password = body('password')
 .exists().withMessage('enter pass')
 .isLength({min: 8}).withMessage('the password is required with minimum length 8 characters')
@@ -73,7 +69,7 @@ const linkedIn=body('linkedIn').trim().optional({nullable:true}).isURL().withMes
 const gitHub=body('gitHub').trim().optional({nullable:true}).isURL().withMessage('please enter a valid URL');
 
 
-exports.registerValidation = [firstName, lastName, email, password, role];
+exports.registerValidation = [firstName, lastName, email, password];
 exports.logInValidation = [email2, password];
 exports.getResetPass = [email2];
 exports.postResetPass = [password, confirmPass];

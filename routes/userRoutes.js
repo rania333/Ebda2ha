@@ -7,7 +7,7 @@ const uploads = require('../middleware/fileUpload');
 const isAdmin = require('../middleware/isAdmin');
 const router = express.Router(); //mini app
 
-router.put('/updateProfile', isAuth,  
+router.put('/updateProfile', isAuth,
 multer({storage: uploads.fileStorage, fileFilter: uploads.fileFilter}).single('pic'),validation.updateProfile ,
 userController.updateProfile);
 router.get('/getUsers', isAuth, isAdmin, userController.getAllUsers); //for admin only

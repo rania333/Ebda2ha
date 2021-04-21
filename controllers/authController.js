@@ -21,12 +21,12 @@ exports.signUp = async (req, res, nxt) => {
     const lastName = req.body.lastName;
     const email = req.body.email;
     const pass = req.body.password;
-    const role = req.body.role;
+    const role = 'user';
     const pic = data.DOMAIN + 'defaultPhoto.png';
     const code = rendomBytes.randomBytes(20).toString('hex'); //ll verification
     if(pass !== confirmPassword) {
         return res.status(401).json({
-            message: "password is not matched "
+            message: "the two password are not matched "
         });
     }
     //encrypt password
