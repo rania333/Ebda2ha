@@ -5,7 +5,7 @@ const {validationResult} = require('express-validator');
 exports.getAllCategory = async(req, res, next) => {
     try{
         const categories = await Category.find()
-        .populate('adminId')
+        .populate('adminId', 'firstName lastName')
         res.status(200).json({
             message: 'Fetched all data successfully',
             categories: categories
@@ -13,8 +13,7 @@ exports.getAllCategory = async(req, res, next) => {
     }catch(err) {
         if (!err.statusCode) {
             err.statusCode = 500;
-          }
-        console.log(err);
+        }
         next(err);
     }
 };
@@ -22,7 +21,7 @@ exports.getAllCategory = async(req, res, next) => {
 exports.getCategory = async(req, res, next) => {
     const categoryId = req.params.categoryId;
     const category = await Category.findById(categoryId)
-         .populate('adminId')
+        .populate('adminId', 'firstName lastName')
     try{
         if(!category) {
             const error = new Error("Couldn't found category.");
@@ -34,16 +33,17 @@ exports.getCategory = async(req, res, next) => {
             error.statusCode = 403;
             throw error;   
         }
+        const user = await User.findById(category.adminId)
         res.status(200).json({
             message: 'category fetched',
-            category: category,
+            category: category
         });
     }catch(err){
         if(!err.statusCode) {
             err.statusCode = 500 
         }
         next(err)
-     };
+    };
 }
 
 exports.AddCategory = async(req, res, next) => {
@@ -63,23 +63,19 @@ exports.AddCategory = async(req, res, next) => {
     });
     try{
         await category.save()
-        const user = await User.findById(req.userId);
-        user.categories.push(category);
-        await user.save(); 
+        const user = await User.findById(req.userId)
         res.status(200).json({
             message: 'Category created successfully',
             category: category,
-            adminId: {_id: user._id, name: user.name}
+            admin: {_id: user._id, firstName: user.firstName, lastName: user.lastName}
         })
     }catch(err){
         if (!err.statusCode) {
             err.statusCode = 500;
-          }
-        console.log(err);
+        }
         next(err);
     }
 };
-
 
 exports.updateCategory = async (req, res, next) => {
 
@@ -95,7 +91,7 @@ exports.updateCategory = async (req, res, next) => {
     const name = req.body.name;
     try {
         const category = await Category.findById(categoryId)
-              .populate('adminId');
+            .populate('adminId', 'firstName lastName');
         if(!category) {
             const error = new Error('Category not found ');
             error.statusCode = 404;
@@ -138,10 +134,6 @@ exports.deleteCategory = async(req, res, next) => {
             throw error;   
         }
         await Category.findByIdAndRemove(categoryId);
-
-        const user = await User.findById(req.userId);
-        user.categories.pull(categoryId);
-        await user.save();
         res.status(200).json({
             message: 'Deleted successfully'
         })       
@@ -149,8 +141,7 @@ exports.deleteCategory = async(req, res, next) => {
     catch(err) {
         if (!err.statusCode) {
             err.statusCode = 500;
-          }
-        console.log(err)
+        }
         next(err);
     }
 };

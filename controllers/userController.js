@@ -87,7 +87,8 @@ exports.myProfile = async (req, res, nxt) => {
     try {
         const userId = req.userId;
         let user = await userModel.findById(userId,
-            'firstName lastName email verified role pic gender DOB summary bio socialLinks');
+            'firstName lastName email verified role pic gender DOB summary bio socialLinks')
+            .populate('posts');
         if (!user) {
             return res.status(404).json({
                 message: "user not exist"
@@ -138,7 +139,8 @@ exports.getUser = async (req, res, nxt) => {
     try {
         const userId = req.params.userId;
         let user = await userModel.findById(userId,
-            'firstName lastName role pic gender DOB summary bio socialLinks');
+            'firstName lastName role pic gender DOB summary bio socialLinks')
+            .populate('posts');
         if (!user) {
             return res.status(404).json({
                 message: "user not exist"
