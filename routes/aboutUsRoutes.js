@@ -1,14 +1,16 @@
 const express = require('express');
-
-const aboutUsController = require('../controllers/aboutUsController')
+const aboutUsController = require('../controllers/aboutUsController');
+const validation = require('../validations/aboutUsValidation');
 const router = express.Router();
 
-router.get('/', aboutUsController.getAllMails)
 
-router.get('/:mailId', aboutUsController.getContactMailInfo)
+router.get('/', aboutUsController.getAllMails);
 
-router.post('/', aboutUsController.sendContactMail)
+router.get('/:mailId', aboutUsController.getContactMailInfo);
 
-router.delete('/:mailId', aboutUsController.sendContactMail)
+router.post('/',validation.sendContactmail, aboutUsController.sendContactMail);
+
+router.delete('/:mailId', aboutUsController.deleteContactMail);
 
 module.exports = router;
+//,validation.sendContactmail

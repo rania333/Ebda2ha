@@ -1,4 +1,5 @@
-const AboutUs = require('../models/aboutUsModel')
+const AboutUs = require('../models/aboutUsModel');
+const {validationResult} = require('express-validator');
 
 exports.getAllMails = async(req,res, next)=>{
     try{
@@ -38,6 +39,13 @@ exports.getContactMailInfo = async(req,res, next)=>{
 }
 exports.sendContactMail = async(req,res, next)=>{
     try{
+        //validation
+    const errors = await validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({
+            errors: errors.array()
+        });
+    }
         const name = req.body.name;
         const email = req.body.email;
         const phone = req.body.phone;
