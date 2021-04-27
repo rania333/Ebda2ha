@@ -2,7 +2,7 @@ const wordNetAPI = require('node-wordnet');
 const data = require('../data');
 const postModel = require('../models/postModel');
 const userModel = require('../models/userModel');
-const itemsPerPage = 4; 
+const itemsPerPage = 50; 
 exports.getAllPost = async (req, res, nxt) => {
     try {
         let condition ; //to put it in find
