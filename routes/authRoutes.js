@@ -5,7 +5,7 @@ const validation = require('../validations/userValidation');
 const router = express.Router(); //mini app
 
 router.post('/signUp', validation.registerValidation, authController.signUp);
-router.put('/verifyNow/:code', authController.verifyEmail);
+router.put('/verifyNow', authController.verifyEmail);
 router.post('/logIn', validation.logInValidation, authController.logIn);
 router.put('/resetPassword', validation.getResetPass, authController.getResetPass);
 router.put('/postNewPass/:token', validation.postResetPass, authController.postNewPass);

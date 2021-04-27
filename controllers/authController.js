@@ -23,7 +23,7 @@ exports.signUp = async (req, res, nxt) => {
     const pass = req.body.password;
     const role = 'user';
     const pic = data.DOMAIN + 'defaultPhoto.png';
-    const code = rendomBytes.randomBytes(20).toString('hex'); //ll verification
+    const code = rendomBytes.randomBytes(3).toString('hex'); //ll verification
     if(pass !== confirmPassword) {
         return res.status(401).json({
             message: "the two password are not matched "
@@ -46,8 +46,7 @@ exports.signUp = async (req, res, nxt) => {
         /* start sending mail to user email to verify its account */
         let html = `
         <h1> Hello ${userr.firstName} </h1>
-        <p> please click to the following link to verify your account</p>
-        <a href="${data.DOMAIN}auth/verifyNow/${userr.verificationCode}"> verify now </a>
+        <p>your code is ${userr.verificationCode} please enter it correctly to verify your account</p>
         `;
         mail.sendEmail(userr.email, "Verify Account", html);
         /* end sending verification mail */
@@ -64,17 +63,16 @@ exports.signUp = async (req, res, nxt) => {
 
 exports.verifyEmail = async (req, res, nxt) => {
     try {
-        const code = req.params.code;
+        const code = req.body.code;
         const user = await userModel.findOne({verificationCode: code});
         if(!user) {
-            const err = new Error(`invalid varification code`);
-            err.statusCode = 404;
-            throw err;
+            return res.status(404).json({
+                        message: "invalid code",
+                })
         }
         user.verified = true;
-        user.verificationCode = undefined;
         const userr = await user.save();
-        res.status(200).json({
+        return res.status(200).json({
             message: "your account is verified",
             user: userr.email,
         })
@@ -207,7 +205,7 @@ exports.postNewPass = async (req, res, nxt) => {
         let hashPass = await bcrypt.hash(pass, 12);
         //edit in model w a5ly kol 7aga zy ma kant
         user.password = hashPass;
-        user.resetPassToken = undefined;
+        user.resetPassToken = undefined//////////;
         let response = await user.save();
         res.status(200).json({
             message: "your password is reset successfully"

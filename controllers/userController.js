@@ -16,7 +16,6 @@ exports.updateProfile = async (req, res, nxt) => {
         }
         //find user
         let user = await userModel.findById(req.userId).select('firstName lastName email role bio summary pic socialLinks' );
-        
         if (!user) {
             return res.status(404).json({
                 message: "user not exist"
