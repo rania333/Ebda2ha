@@ -29,19 +29,16 @@ const email = body('email')
 const password = body('password')
 .exists().withMessage('enter pass')
 .isLength({min: 8}).withMessage('the password is required with minimum length 8 characters')
-.matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
 .withMessage('please enter at least one lowercase & one uppercase letter & one number with minimum length 8');
 
 const oldPass = body('oldPassword')
 .exists().withMessage('enter pass')
 .isLength({min: 8}).withMessage('the password is required with minimum length 8 characters')
-.matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
 .withMessage('please enter at least one lowercase & one uppercase letter & one number with minimum length 8');
 
 const newPass = body('newPassword')
 .exists().withMessage('enter pass')
 .isLength({min: 8}).withMessage('the password is required with minimum length 8 characters')
-.matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
 .withMessage('please enter at least one lowercase & one uppercase letter & one number with minimum length 8');
 
 const email2 = body('email')

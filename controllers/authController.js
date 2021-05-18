@@ -6,7 +6,7 @@ const {validationResult} = require('express-validator');
 const userModel = require('../models/userModel');
 const mail = require('../sendEmail');
 
-exports.signUp = async (req, res, nxt) => {
+exports.SignUp = async (req, res, nxt) => {
     try {
     //validation
     const errors = await validationResult(req);
@@ -20,17 +20,17 @@ exports.signUp = async (req, res, nxt) => {
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
     const email = req.body.email;
-    const pass = req.body.password;
-    const role = 'user';
+    const password = req.body.password;
+    const role = req.body.role;
     const pic = data.DOMAIN + 'defaultPhoto.png';
     const code = rendomBytes.randomBytes(3).toString('hex'); //ll verification
-    if(pass !== confirmPassword) {
+    if(password !== confirmPassword) {
         return res.status(401).json({
             message: "the two password are not matched "
         });
     }
     //encrypt password
-    let hashedPass = await bcrypt.hash(pass, 12)
+    let hashedPass = await bcrypt.hash(password, 12)
     //add to DB
     const user = new userModel({
         firstName: firstName,
@@ -83,7 +83,7 @@ exports.verifyEmail = async (req, res, nxt) => {
     }
 }
 
-exports.logIn = async (req, res, nxt) => {
+exports.login = async (req, res, nxt) => {
     try {
         //validation
         const errors = await validationResult(req);
@@ -94,14 +94,14 @@ exports.logIn = async (req, res, nxt) => {
         }
         //hold data
         const email = req.body.email;
-        const pass = req.body.password;
+        const password = req.body.password;
         const user = await userModel.findOne({email: email});
         if(!user) {
             return res.status(404).json({
                 message: "user not exist"
             });
         }
-        const equal = await bcrypt.compare(pass, user.password);
+        const equal = await bcrypt.compare(password, user.password);
         if(!equal) {
             return res.status(403).json({
                 message: "incorrect password"
@@ -127,7 +127,7 @@ exports.logIn = async (req, res, nxt) => {
             message: "you're logged in",
             user: 'welcome ' + user.firstName,
             data: user.getUserInfo(),
-            token: `Bearer ${token}`
+            token: `${token}`
         });
     } catch (err) {
         return res.status(500).json({
@@ -192,12 +192,12 @@ exports.postNewPass = async (req, res, nxt) => {
                 errors: errors.array()
             });
         }
-        const pass = req.body.password;
+        const password = req.body.password;
         const confirmPass = req.body.confirm;
         const token = req.params.token;
         const user = await userModel.findOne({resetPassToken: token});
         //compare two passwords
-        if(pass !== confirmPass) {
+        if(password !== confirmPass) {
             return res.status(401).json({
                 message: "the two passwords are not matched"
             });

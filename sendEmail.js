@@ -1,13 +1,12 @@
 const data = require('./data');
 const nodeMailer = require('nodemailer');
 const transporter = nodeMailer.createTransport({
-    service: "gmail",
+   host: 'stmp.gmail.com',
+   port: 465,
+   secure: true,
     auth: {
         user: data.EMAIL,
         pass: data.PASS
-    },
-    tls: {
-        rejectUnauthorized: false
     }
 });
 exports.sendEmail = (email, subject, html) => {
