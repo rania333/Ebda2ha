@@ -94,8 +94,20 @@ exports.myProfile = async (req, res, nxt) => {
             });
         } 
         return res.status(200).json({
-            message: "you fetched the user successfully",
-            user: user
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            pic: user.pic,
+            role: user.role,
+            gender: user.gender,
+            DOB: user.DOB,
+            bio: user.bio,
+            summary: user.summary, 
+            facebook: user.socialLinks.facebook,
+            linkedIn: user.socialLinks.linkedIn,
+            github: user.socialLinks.gitHub,
+            posts: user.posts
+
         });
     } catch (err) {
         return res.status(500).json({
