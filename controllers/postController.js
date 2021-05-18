@@ -1,5 +1,6 @@
 const wordNetAPI = require('node-wordnet');
 const data = require('../data');
+const {validationResult} = require('express-validator');
 const postModel = require('../models/postModel');
 const userModel = require('../models/userModel');
 const itemsPerPage = 4; 
@@ -65,6 +66,13 @@ exports.findPost = async (req, res, nxt) => {
 
 exports.createPost = async (req, res, nxt) => {
     try {
+        //validation
+        const errors = await validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({
+                errors: errors.array()
+            });
+        }
         //hold data
         const title = req.body.title;
         const content = req.body.content;
@@ -104,6 +112,14 @@ exports.createPost = async (req, res, nxt) => {
 
 exports.updatePost = async (req, res, nxt) => {
     try {
+
+        //validation
+        const errors = await validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({
+                errors: errors.array()
+            });
+        }
         const postId = req.params.postId;
         const post = await postModel.findById(postId)
         .populate('categoryId', {name:  1});
@@ -174,6 +190,14 @@ exports.deletePost = async (req, res, nxt) => {
 
 exports.filter = async (req, res, nxt) => {
     try {
+
+        //validation
+        const errors = await validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({
+                errors: errors.array()
+            });
+        }
         //hold data
         const category = req.body.categoryId;
         var arr = [];
@@ -204,6 +228,14 @@ exports.filter = async (req, res, nxt) => {
 
 exports.search = async (req, res, nxt) =>{
     try {
+        //validation
+        const errors = await validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({
+                errors: errors.array()
+            });
+        }
+
         const key = req.body.key;
         let arr = [];
         let uniqueArray = [];
