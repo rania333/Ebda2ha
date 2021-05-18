@@ -24,7 +24,7 @@ exports.updateProfile = async (req, res, nxt) => {
         //hold data 
         const firstName = req.body.firstName;
         const lastName = req.body.lastName;
-        // const role = req.body.role;
+        const role = req.body.role;
         const gender = req.body.gender;
         const DOB = req.body.DOB ? new Date(req.body.DOB).toISOString().replace(/\T.*/, '') : undefined;
         // delete the time and everything after
@@ -43,6 +43,7 @@ exports.updateProfile = async (req, res, nxt) => {
         //override
         user.firstName = firstName;
         user.lastName = lastName;
+        user.role = role;
         user.pic = pic;
         user.gender = gender;
         user.DOB = DOB;
@@ -94,8 +95,17 @@ exports.myProfile = async (req, res, nxt) => {
             });
         } 
         return res.status(200).json({
-            message: "you fetched the user successfully",
-            user: user
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            pic: user.pic,
+            role: user.role,
+            gender: user.gender,
+            DOB: user.DOB,
+            bio: user.bio,
+            summary: user.summary,
+            // message: "you fetched the user successfully",
+            // user: user
         });
     } catch (err) {
         return res.status(500).json({
