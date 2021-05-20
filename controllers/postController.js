@@ -66,6 +66,13 @@ exports.findPost = async (req, res, nxt) => {
 exports.createPost = async (req, res, nxt) => {
     try {
         // console.log(req.userId)
+                //validation
+                const errors = await validationResult(req);
+                if (!errors.isEmpty()) {
+                    return res.status(422).json({
+                        errors: errors.array()
+                    });
+                }
         //hold data
         const title = req.body.title;
         const content = req.body.content;
@@ -107,6 +114,13 @@ exports.createPost = async (req, res, nxt) => {
 exports.updatePost = async (req, res, nxt) => {
     try {
         
+        //validation
+        const errors = await validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({
+                errors: errors.array()
+            });
+        }
         const postId = req.params.postId;
         const post = await postModel.findById(postId)
         .populate('categoryId', {name:  1});
