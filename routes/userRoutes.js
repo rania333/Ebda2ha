@@ -7,9 +7,14 @@ const uploads = require('../middleware/fileUpload');
 const isAdmin = require('../middleware/isAdmin');
 const router = express.Router(); //mini app
 
-router.put('/updateProfile', isAuth,
+router.put('/updateProfile', isAuth, userController.updateProfile);
+
+router.put('/updatepic', isAuth,
 multer({storage: uploads.fileStorage, fileFilter: uploads.fileFilter}).single('pic'),validation.updateProfile ,
-userController.updateProfile);
+userController.updatepicture);
+
+router.delete('/deletepic', isAuth, userController.deletePicture); 
+
 router.get('/getUsers', isAuth, isAdmin, userController.getAllUsers); //for admin only
 router.get('/filter', isAuth,validation.filter , userController.filter); //x validation hena x l input
 router.get('/', isAuth, userController.myProfile);//l profile bta3i ana 

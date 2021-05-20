@@ -15,7 +15,7 @@ exports.updateProfile = async (req, res, nxt) => {
             });
         }
         //find user
-        let user = await userModel.findById(req.userId).select('firstName lastName email role bio summary pic socialLinks' );
+        let user = await userModel.findById(req.userId).select('firstName lastName email role bio summary socialLinks pic' );
         if (!user) {
             return res.status(404).json({
                 message: "user not exist"
@@ -33,18 +33,11 @@ exports.updateProfile = async (req, res, nxt) => {
         const fb = req.body.facebook;
         const linked =req.body.linkedIn;
         const github =req.body.gitHub;
-        let pic; 
-        //handle l pic
-        if (req.file == undefined) {
-            pic = data.DOMAIN + 'defaultPhoto.png';
-        } else {
-            pic = data.DOMAIN + req.file.filename;
-        }
+        
         //override
         user.firstName = firstName;
         user.lastName = lastName;
         user.role = role;
-        user.pic = pic;
         user.gender = gender;
         user.DOB = DOB;
         user.bio = bio;
@@ -59,13 +52,66 @@ exports.updateProfile = async (req, res, nxt) => {
             user: updatedUser
         });
 
-    } catch (err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+    } catch(err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 }; 
 
+exports.updatepicture = async(req, res, nxt)=>{
+    try{
+        let user = await userModel.findById(req.userId).select('pic');
+        if (!user) {
+            return res.status(404).json({
+                message: "user not exist"
+            });
+        }
+        let pic; 
+        if (req.file == undefined) {
+            return res.status(200).json({
+                message: "file is not picture",
+            });
+        } else {
+            pic = data.DOMAIN + req.file.filename;
+            user.pic = pic;
+            let updatedUser = await user.save();
+            return res.status(200).json({
+                message: "picture updated successfully",
+                user: updatedUser
+            });
+        }
+    }
+    catch(err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
+    }
+}
+exports.deletePicture = async(req, res, nxt) =>{
+    try{
+        let user = await userModel.findById(req.userId).select('pic');
+        if (!user) {
+            return res.status(404).json({
+                message: "user not exist"
+            });
+        }
+        const pic = data.DOMAIN + 'defaultPhoto.png';
+        user.pic = pic;
+        let updatedUser = await user.save();
+        return res.status(200).json({
+            message: "picture deleted successfully",
+            user: updatedUser
+        });
+    }catch(err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
+    }
+}
 exports.getAllUsers = async (req, res, nxt) => {
     try {
         let users = await userModel.find({})

@@ -65,6 +65,7 @@ exports.findPost = async (req, res, nxt) => {
 
 exports.createPost = async (req, res, nxt) => {
     try {
+        // console.log(req.userId)
         //hold data
         const title = req.body.title;
         const content = req.body.content;
@@ -95,15 +96,17 @@ exports.createPost = async (req, res, nxt) => {
             message: "your post is created successfully",
             post: postt
         });
-    } catch (err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+    } catch(err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 };
 
 exports.updatePost = async (req, res, nxt) => {
     try {
+        
         const postId = req.params.postId;
         const post = await postModel.findById(postId)
         .populate('categoryId', {name:  1});
@@ -121,6 +124,7 @@ exports.updatePost = async (req, res, nxt) => {
         const title = req.body.title;
         const content = req.body.content;
         const category = req.body.categoryId;
+
         let pic = [];
         //handle files
         if(req.files.length != 0) {
@@ -139,10 +143,11 @@ exports.updatePost = async (req, res, nxt) => {
             message: 'post is updated successfully',
             post: updatedPost
         })
-    } catch (err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+    } catch(err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 };
 
