@@ -33,18 +33,10 @@ exports.updateProfile = async (req, res, nxt) => {
         const fb = req.body.facebook;
         const linked =req.body.linkedIn;
         const github =req.body.gitHub;
-        let pic; 
-        //handle l pic
-        if (req.file == undefined) {
-            pic = data.DOMAIN + 'defaultPhoto.png';
-        } else {
-            pic = data.DOMAIN + req.file.filename;
-        }
         //override
         user.firstName = firstName;
         user.lastName = lastName;
         user.role = role;
-        user.pic = pic;
         user.gender = gender;
         user.DOB = DOB;
         user.bio = bio;
@@ -60,9 +52,10 @@ exports.updateProfile = async (req, res, nxt) => {
         });
 
     } catch (err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 }; 
 
@@ -104,13 +97,15 @@ exports.myProfile = async (req, res, nxt) => {
             DOB: user.DOB,
             bio: user.bio,
             summary: user.summary,
+            posts: user.posts.length,
             // message: "you fetched the user successfully",
             // user: user
         });
     } catch (err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 };
 
@@ -294,6 +289,65 @@ exports.changePass = async (req, res, nxt) => {
         return res.status(500).json({
             message: "an error occured"
         });
+    }
+}
+
+exports.createAvatar = async (req, res, nxt) => {
+    try {
+        //find user
+        let user = await userModel.findById(req.userId)
+        .select('firstName lastName email role bio summary pic socialLinks' );
+        if (!user) {
+            return res.status(404).json({
+                message: "user not exist"
+            });
+        }
+        //handle l pic
+        let pic;
+        if (req.file == undefined) {
+            pic = data.DOMAIN + 'defaultPhoto.png';
+        } else {
+            pic = data.DOMAIN + req.file.filename;
+        }
+        user.pic = pic
+        //save in DB
+        let updatedUser = await user.save();
+        return res.status(200).json({
+            message: "updated successfully",
+            user: updatedUser
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err)
+    }
+}
+
+exports.deleteAvatar = async (req, res, nxt) => {
+    try {
+        //find user
+        let user = await userModel.findById(req.userId)
+        .select('firstName lastName email role bio summary pic socialLinks' );
+        if (!user) {
+            return res.status(404).json({
+                message: "user not exist"
+            });
+        }
+        //handle l pic
+        let pic = data.DOMAIN + 'defaultPhoto.png';
+        user.pic = pic
+        //save in DB
+        let updatedUser = await user.save();
+        return res.status(200).json({
+            message: "deleted successfully",
+            user: updatedUser
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err)
     }
 }
 
