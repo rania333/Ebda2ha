@@ -161,7 +161,7 @@ exports.getResetPass = async (req, res, nxt) => {
             verified: user.verified,
             userId: user._id.toString()
         }
-        global.resetToken = await sign(payload, data.SECRET, {expiresIn: "1h"});
+        global.resetToken = await sign(payload, data.SECRET, {expiresIn: "1s"});
         user.resetPassToken = resetToken;
         const userr = await user.save();
         /* start sending mail to user email to reset password */
@@ -192,27 +192,31 @@ exports.postNewPass = async (req, res, nxt) => {
                 errors: errors.array()
             });
         }
-        const password = req.body.password;
-        const confirmPass = req.body.confirm;
-        const token = req.params.token;
-        const user = await userModel.findOne({resetPassToken: token});
-        //compare two passwords
-        if(password !== confirmPass) {
-            return res.status(401).json({
-                message: "the two passwords are not matched"
+        console.log(resetToken);
+        if(resetToken){
+            const password = req.body.password;
+            const confirmPass = req.body.confirm;
+            const tokenn = req.params.token;
+            const user = await userModel.findOne({resetPassToken: tokenn});
+            //compare two passwords
+            if(password !== confirmPass) {
+                return res.status(401).json({
+                    message: "the two passwords are not matched"
+                });
+            }
+            let hashPass = await bcrypt.hash(password, 12);
+            //edit in model w a5ly kol 7aga zy ma kant
+            user.password = hashPass;
+            user.resetPassToken = undefined//////////;
+            let response = await user.save();
+            res.status(200).json({
+                message: "your password is reset successfully"
             });
         }
-        let hashPass = await bcrypt.hash(pass, 12);
-        //edit in model w a5ly kol 7aga zy ma kant
-        user.password = hashPass;
-        user.resetPassToken = undefined//////////;
-        let response = await user.save();
-        res.status(200).json({
-            message: "your password is reset successfully"
-        });
     } catch (err) {
+        nxt(err);
         return res.status(401).json({
-            message: `the token is expired! try to request reset password again from http://localhost:8080/auth/resetPassword`
+            message: `the token is expired! try to request reset password again from http://localhost:3000/auth/resetPassword`
         });
     }
 }

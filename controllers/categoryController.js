@@ -1,6 +1,7 @@
 const Category = require('../models/categoryModel');
 const User = require('../models/userModel');
 const {validationResult} = require('express-validator');
+const Posts = require('../models/postModel')
 
 exports.getAllCategory = async(req, res, next) => {
     try{
@@ -56,14 +57,19 @@ exports.AddCategory = async(req, res, next) => {
         });
     }
 
-    const name = req.body.name;
-    const category = new Category({
-        name: name,
-        adminId: req.userId    
-    });
     try{
-        await category.save()
         const user = await User.findById(req.userId)
+        if(!user){
+            res.status(200).json({
+                message: 'not authorized',
+            })
+        }
+        const name = req.body.name;
+        const category = new Category({
+            name: name,
+            adminId: req.userId    
+        });
+        await category.save()
         res.status(200).json({
             message: 'Category created successfully',
             category: category,
@@ -123,6 +129,7 @@ exports.deleteCategory = async(req, res, next) => {
     const categoryId = req.params.categoryId;
     try{
         const category = await Category.findById(categoryId);
+        const posts = await  Posts.deleteMany({categoryId: categoryId});
         if(!category) {
             const error = new Error('Category not found ');
             error.statusCode = 404;

@@ -3,6 +3,7 @@ const data = require('../data');
 const {validationResult} = require('express-validator');
 const postModel = require('../models/postModel');
 const userModel = require('../models/userModel');
+const { tail, add } = require('lodash');
 const itemsPerPage = 50; 
 exports.getAllPost = async (req, res, nxt) => {
     try {
@@ -27,6 +28,7 @@ exports.getAllPost = async (req, res, nxt) => {
         const posts = await postModel.find(condition) //condition on retrieved posts
         .populate('createdBy', {firstName:1, lastName:1}) 
         .populate('categoryId', {name:  1})
+        .sort({updatedAt: -1})
         .skip((page - 1) * itemsPerPage)
         .limit(itemsPerPage);
         return res.status(200).json({
@@ -76,6 +78,13 @@ exports.createPost = async (req, res, nxt) => {
         //hold data
         const title = req.body.title;
         const content = req.body.content;
+        const price = req.body.price;
+        const fbPage = req.body.fbPage;
+        const WebsiteLink = req.body.WebsiteLink;
+        const Phone = req.body.Phone;
+        const Address = req.body.Address;
+        const Target = req.body.Target;
+        const typed = req.body.typed;
         const categoryId = req.body.categoryId;
         const user = req.userId;
         let pic = []; 
@@ -89,6 +98,13 @@ exports.createPost = async (req, res, nxt) => {
         const post = new postModel({
             title: title,
             content: content,
+            price: price,
+            fbPage: fbPage,
+            WebsiteLink: WebsiteLink,
+            Phone: Phone,
+            Target: Target,
+            typed: typed,
+            Address: Address,
             pic: pic,
             categoryId: categoryId,
             createdBy: user
@@ -136,10 +152,17 @@ exports.updatePost = async (req, res, nxt) => {
         //hold new values
         const title = req.body.title;
         const content = req.body.content;
+        const price = req.body.price;
+        const fbPage = req.body.fbPage;
+        const WebsiteLink = req.body.WebsiteLink;
+        const Phone = req.body.Phone;
+        const Address = req.body.Address;
+        const Target = req.body.Target;
+        const typed = req.body.typed;
         const category = req.body.categoryId;
         let pic = [];
         //handle files
-        if(req.files.length != 0) {
+        if(req.files != undefined) {
             req.files.forEach(file => {
                 pic.push(data.DOMAIN + file.filename);
             })
@@ -147,6 +170,13 @@ exports.updatePost = async (req, res, nxt) => {
         //override
         post.title = title;
         post.content = content;
+        post.price = price;
+        post.fbPage = fbPage;
+        post.WebsiteLink = WebsiteLink;
+        post.Phone = Phone;
+        post.Address = Address;
+        post.Target = Target;
+        post.typed = typed;
         post.categoryId = category;
         post.pic = pic;
         //save in db
@@ -156,6 +186,7 @@ exports.updatePost = async (req, res, nxt) => {
             post: updatedPost
         })
     } catch (err) {
+        nxt(err) 
         return res.status(500).json({
             message: "an error occured"
         });
@@ -291,5 +322,67 @@ exports.search = async (req, res, nxt) =>{
             message: "an error occured"
         });
     }
+};
+
+
+exports.allapprovedPosts = async (req, res, next)=>{
+    try{
+        const posts = await postModel.find({approved: false})
+            .populate('createdBy', {firstName:1, lastName:1}) 
+            .populate('categoryId', {name:  1})
+            .sort({updatedAt: -1});
+
+        return res.status(200).json({
+            message: "posts are fetched successfully",
+            search_Result: posts.length,
+            posts: posts.length>0 ? posts : "No posts Found"
+        });
+    }
+    catch(err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
 }
 
+exports.approvedPost = async (req, res, next)=>{
+    try{
+        const post = await postModel.findById(req.params.postId)
+            .populate('createdBy', {firstName:1, lastName:1}) 
+            .populate('categoryId', {name:  1})
+        
+        post.approved = true;
+        const updatedPost = await post.save();
+        return res.status(200).json({
+            message: 'post is updated successfully',
+            post: updatedPost
+        })
+    }
+    catch(err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+exports.deleteApprovedPost = async (req, res, next)=>{
+    try{    
+        const post = await postModel.findById(req.params.postId);
+        if(!post){
+            return res.status(200).json({
+                message: 'post not exist'
+            })    
+        }        
+        const result = await postModel.findByIdAndRemove(req.params.postId);
+        return res.status(200).json({
+            message: 'the post is deleted successfully'
+        })
+    }
+    catch(err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
