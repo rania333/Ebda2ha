@@ -24,7 +24,6 @@ exports.updateProfile = async (req, res, nxt) => {
         //hold data 
         const firstName = req.body.firstName;
         const lastName = req.body.lastName;
-        const role = req.body.role;
         const gender = req.body.gender;
         const DOB = req.body.DOB ? new Date(req.body.DOB).toISOString().replace(/\T.*/, '') : undefined;
         // delete the time and everything after
@@ -36,7 +35,6 @@ exports.updateProfile = async (req, res, nxt) => {
         //override
         user.firstName = firstName;
         user.lastName = lastName;
-        user.role = role;
         user.gender = gender;
         user.DOB = DOB;
         user.bio = bio;
