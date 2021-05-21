@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 
 const path = require('path');
 const cors= require('cors');
@@ -13,6 +12,7 @@ const userRoutes = require('./routes/userRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const postRoutes = require('./routes/postRoutes');
 const aboutusRoutes = require('./routes/aboutUsRoutes');
+const commentRoutes = require('./routes/commentRoutes');
 
 const app = express();
 
@@ -35,6 +35,7 @@ app.use((req, res, nxt) => {
 app.use('/auth', authRoutes);
 app.use('/profile', userRoutes);
 app.use('/category', categoryRoutes);
+app.use('/post/:postId/comment', commentRoutes);
 app.use('/post', postRoutes);
 app.use('/aboutus', aboutusRoutes);
 /* end routes */

@@ -1,14 +1,14 @@
 const data = require('./data');
 const nodeMailer = require('nodemailer');
-const transporter = nodeMailer.createTransport({
-   host: 'stmp.gmail.com',
-   port: 465,
-   secure: true,
+const smtpTransport = require('nodemailer-smtp-transport');
+const transporter = nodeMailer.createTransport(smtpTransport({
+    service: "gmail",
+    host: 'stmp.gmail.com',
     auth: {
         user: data.EMAIL,
         pass: data.PASS
     }
-});
+}));
 exports.sendEmail = (email, subject, html) => {
     var opts = {
         from: data.EMAIL,

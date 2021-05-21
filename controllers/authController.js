@@ -202,7 +202,7 @@ exports.postNewPass = async (req, res, nxt) => {
                 message: "the two passwords are not matched"
             });
         }
-        let hashPass = await bcrypt.hash(pass, 12);
+        let hashPass = await bcrypt.hash(password, 12);
         //edit in model w a5ly kol 7aga zy ma kant
         user.password = hashPass;
         user.resetPassToken = undefined//////////;
@@ -211,8 +211,8 @@ exports.postNewPass = async (req, res, nxt) => {
             message: "your password is reset successfully"
         });
     } catch (err) {
-        return res.status(401).json({
-            message: `the token is expired! try to request reset password again from http://localhost:8080/auth/resetPassword`
-        });
-    }
+        return res.status(500).json({
+        "message": "the token is expired! try to request reset password again from http://localhost:8080/auth/resetPassword"
+    })
+}
 }

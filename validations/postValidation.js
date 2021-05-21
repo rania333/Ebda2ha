@@ -2,11 +2,10 @@ const {body} = require('express-validator');
 const postModel = require('../models/postModel');
 const { notify } = require('../routes/postRoutes');
 
-const Title = body('title')
+const Title = body('StartupName')
 .exists().withMessage('please enter a title for your post')
-.isAlphanumeric().withMessage('title should be letters or / and characters only');
 
-const Content = body('content')
+const Content = body('description')
 .exists().withMessage('please enter a conent for your post');
 
 const CategoryId = body('categoryId')

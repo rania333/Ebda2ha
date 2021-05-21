@@ -26,7 +26,6 @@ const userModel = new schema({
     },
     pic: {
         type: String,
-
     },
     gender: {
         type: String,
@@ -35,6 +34,12 @@ const userModel = new schema({
         type: Date,
     },
     bio: {
+        type: String
+    },
+    job: {
+        type: String,
+    },
+    education: {
         type: String
     },
     summary: {
@@ -48,6 +53,17 @@ const userModel = new schema({
             type: String,
         },
         gitHub: {
+            type: String
+        }
+    },
+    location: {
+        address: {
+            type: String,
+        },
+        city: {
+            type: String,
+        },
+        country: {
             type: String
         }
     },
@@ -69,7 +85,14 @@ const userModel = new schema({
     }],
     interests: [{
         type: String
+    }],
+    comments: [{
+        type: schema.Types.ObjectId,
+        ref: 'Comment'
     }]
+    // comments: [{
+    //     type: schema.ty
+    // }]
 }, {
     timestamps: true
 });

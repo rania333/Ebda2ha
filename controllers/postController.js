@@ -3,7 +3,8 @@ const data = require('../data');
 const {validationResult} = require('express-validator');
 const postModel = require('../models/postModel');
 const userModel = require('../models/userModel');
-const itemsPerPage = 50; 
+const commentModel = require('../models/commentModel');
+const itemsPerPage = 6; 
 exports.getAllPost = async (req, res, nxt) => {
     try {
         let condition ; //to put it in find
@@ -21,23 +22,39 @@ exports.getAllPost = async (req, res, nxt) => {
                 return new RegExp(el, "i");
             })]
             condition = {$and:[{approved: true},
-                {$or: [{content: {$in: mappedArr}}, {title: {$in: mappedArr}}]}]}
+                {$or: [{description: {$in: mappedArr}}, {StartupName: {$in: mappedArr}}]}]}
         }
         //find
         const posts = await postModel.find(condition) //condition on retrieved posts
         .populate('createdBy', {firstName:1, lastName:1}) 
         .populate('categoryId', {name:  1})
+        .populate({
+            path: 'comments',
+            select: 'content',
+            populate: {
+                path: 'userId',
+                model: 'User',
+                select: 'firstName lastName pic'
+            }
+        })
         .skip((page - 1) * itemsPerPage)
-        .limit(itemsPerPage);
+        .limit(itemsPerPage)
+        .sort({createdAt: -1});
+        if (!posts) {
+            return res.status(404).json({
+                "message" : "no posts found"
+            });
+        }
         return res.status(200).json({
             message: 'posts are fetched successfully',
             search_Result: posts.length,
-            posts: posts.length>0 ? posts : "No Posts Found"
+            posts: posts.length > 0 ? posts : "No Posts Found"
         });
     } catch (err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 }
 
@@ -45,9 +62,19 @@ exports.findPost = async (req, res, nxt) => {
     try {
         //hold data
         const postId = req.params.postId;
-        const post = await postModel.findById(postId).populate('createdBy',
+        const post = await postModel.findById(postId)
+        .sort({createdAt: -1}).populate('createdBy',
         {firstName:1, lastName:1})
-        .populate('categoryId', {name:  1});
+        .populate('categoryId', {name:  1})
+        .populate({
+            path: 'comments',
+            select: 'content',
+            populate: {
+                path: 'userId',
+                model: 'User',
+                select: 'firstName lastName pic'
+            }
+        }).exec()
         if(!post || !post.approved) {
             return res.status(404).json({
                 message: "this post is not found"
@@ -58,9 +85,10 @@ exports.findPost = async (req, res, nxt) => {
             post: post
         });
     } catch(err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 }; 
 
@@ -74,9 +102,8 @@ exports.createPost = async (req, res, nxt) => {
             });
         }
         //hold data
-        const title = req.body.title;
-        const content = req.body.content;
-        const categoryId = req.body.categoryId;
+        const {StartupName, description, facebookpage, websitelink, phone, 
+            addressLine, price, productname, posttype, category, categoryId} = req.body;
         const user = req.userId;
         let pic = []; 
         //handle files
@@ -87,10 +114,18 @@ exports.createPost = async (req, res, nxt) => {
         }
         //create new object
         const post = new postModel({
-            title: title,
-            content: content,
-            pic: pic,
-            categoryId: categoryId,
+            StartupName,
+            description,
+            categoryId,
+            facebookpage,
+            websitelink,
+            phone,
+            addressLine,
+            price,
+            productname,
+            posttype,
+            pic,
+            category,
             createdBy: user
         });
         //save in db
@@ -104,15 +139,15 @@ exports.createPost = async (req, res, nxt) => {
             post: postt
         });
     } catch (err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 };
 
 exports.updatePost = async (req, res, nxt) => {
     try {
-
         //validation
         const errors = await validationResult(req);
         if (!errors.isEmpty()) {
@@ -134,20 +169,27 @@ exports.updatePost = async (req, res, nxt) => {
             });
         }
         //hold new values
-        const title = req.body.title;
-        const content = req.body.content;
-        const category = req.body.categoryId;
+        const {StartupName, description, facebookpage, websitelink, phone, 
+            addressLine, price, productname, posttype, category, categoryId} = req.body;
         let pic = [];
         //handle files
-        if(req.files.length != 0) {
+        if(req.files != undefined) {
             req.files.forEach(file => {
                 pic.push(data.DOMAIN + file.filename);
             })
         }
         //override
-        post.title = title;
-        post.content = content;
-        post.categoryId = category;
+        post.StartupName = StartupName;
+        post.description = description;
+        post.categoryId = categoryId;
+        post.facebookpage = facebookpage;
+        post.websitelink = websitelink;
+        post.phone = phone;
+        post.addressLine = addressLine;
+        post.productname = productname;
+        post.price = price;
+        post.category = category;
+        post.posttype = posttype;
         post.pic = pic;
         //save in db
         const updatedPost = await post.save();
@@ -156,9 +198,10 @@ exports.updatePost = async (req, res, nxt) => {
             post: updatedPost
         })
     } catch (err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 };
 
@@ -177,14 +220,32 @@ exports.deletePost = async (req, res, nxt) => {
             });
         }
         const result = await postModel.findByIdAndRemove(postId);
+        //delete comments on this post 
+        const comments = await commentModel.find({postId: postId});
+        if(!comments) {
+            return res.status(404).json({
+                "message" : "comments are not found"
+            });
+        }
+        await commentModel.deleteMany({postId: postId})
+        //delete it from user model
+        const user = await userModel.findById(req.userId);
+        if(!user) {
+            return res.status(404).json({
+                "message": "user is not found"
+            })
+        }
+        user.posts.pull(postId);
+        await user.save();
         return res.status(200).json({
             message: 'the post is deleted successfully',
             post: result
         })
     } catch(err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 };
 
@@ -205,8 +266,19 @@ exports.filter = async (req, res, nxt) => {
         const posts = await postModel.find({categoryId: category}).populate('createdBy',
         {firstName:1, lastName:1})
         .populate('categoryId', {name:  1})
+        .populate('categoryId', {name:  1})
+        .populate({
+            path: 'comments',
+            select: 'content',
+            populate: {
+                path: 'userId',
+                model: 'User',
+                select: 'firstName lastName pic'
+            }
+        }).exec()
         .skip((page - 1) * itemsPerPage)
-        .limit(itemsPerPage);;
+        .limit(itemsPerPage)
+        .sort({createdAt: -1})
         //filter posts according to approving
         posts.forEach(Element => {
             if(Element.approved) {
@@ -220,9 +292,10 @@ exports.filter = async (req, res, nxt) => {
             posts: arr.length>0 ? arr : "No Posts Found"
         })
     } catch(err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 }
 
@@ -242,6 +315,7 @@ exports.search = async (req, res, nxt) =>{
         const page = req.query.page ? parseInt(req.query.page) : 1; //for pagination
         let wordnet = new wordNetAPI();
         const words = await wordnet.lookupAsync(key);
+        console.log(words);
         //loop on all data in api to combine it
         words.forEach(word => {
             arr.push(...word.synonyms);
@@ -270,12 +344,23 @@ exports.search = async (req, res, nxt) =>{
         });
         user.save();
         //l database
-        const post = await postModel.find({$or: [{$and:[{content: {$in: mappedArr}}, {approved: true}]}, 
+        const post = await postModel.find({$or: [{$and:[{description: {$in: mappedArr}}, {approved: true}]}, 
             {$and:[{title: {$in: mappedArr}}, {approved: true}]}]})
             .populate('createdBy', {firstName:1, lastName:1})
             .populate('categoryId', {name:  1})
+            .populate('categoryId', {name:  1})
+            .populate({
+                path: 'comments',
+                select: 'content',
+                populate: {
+                    path: 'userId',
+                    model: 'User',
+                    select: 'firstName lastName pic'
+                }
+        }).exec()
             .skip((page - 1) * itemsPerPage)
-            .limit(itemsPerPage);;
+            .limit(itemsPerPage)
+            .sort({createdAt: -1});
         if (!post) {
             return res.status(404).json({
                 message: "no posts found"
@@ -287,9 +372,93 @@ exports.search = async (req, res, nxt) =>{
                 posts: post.length>0 ? post : "No posts Found"
         });
     } catch(err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 }
 
+//for admin
+exports.getAllUnapprovedPost = async (req, res, nxt) => {
+    try {
+        const userId = req.userId;
+        const page = req.query.page ? parseInt(req.query.page) : 1; //for pagination
+        const user = await userModel.findById(userId)
+        if(!user || user.role !== 'admin') {
+            return res.status(401).json({
+                message: "you're unauthorized to perform this operation"
+            });
+        }
+        const posts = await postModel.find({approved: false})
+        .sort({createdAt: -1})
+        .skip((page - 1) * itemsPerPage)
+        .limit(itemsPerPage);;
+        return res.status(200).json({
+            search_Result: posts.length,
+            posts: posts.length != 0 ? posts : "No posts found",
+        })
+    } catch(err) {
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err)
+    }
+}
+exports.approvPost = async (req, res, nxt) => {
+    try {
+        const postId = req.params.postId;
+        const userId = req.userId;
+        const user = await userModel.findById(userId)
+        if(!user || user.role !== 'admin') {
+            return res.status(401).json({
+                message: "you're unauthorized to perform this operation"
+            });
+        }
+        const post = await postModel.findById(postId);
+        post.approved = true;
+        await post.save();
+        return res.status(404).json({
+            message: "post is approved successfully",
+            post: post
+        })
+    } catch(err) {
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err)
+    }
+}
+exports.refusePost = async (req, res, nxt) => {
+    try {
+        const postId = req.params.postId;
+        const userId = req.userId;
+        const user = await userModel.findById(userId)
+        if(!user || user.role !== 'admin') {
+            return res.status(401).json({
+                message: "you're unauthorized to perform this operation"
+            });
+        }
+        const post = await postModel.findById(postId);
+        if(!post) {
+            return res.status(404).json({
+                message: "the post is not exist"
+            });
+        }
+        const deletePost = await postModel.findByIdAndRemove(postId);
+        //delete it from user model
+        const userOwnerId = post.createdBy; //id l user l 3amel l post
+        const userOwner = await userModel.findById(userOwnerId);
+        userOwner.posts.pull(postId);
+        await userOwner.save();
+        return res.status(200).json({
+            message: "post is deleted successfully",
+            post: deletePost
+        })
+    } catch(err) {
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err)
+    }
+}
