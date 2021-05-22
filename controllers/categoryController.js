@@ -141,7 +141,7 @@ exports.deleteCategory = async(req, res, next) => {
         }
         await Category.findByIdAndRemove(categoryId);
         //delete all posts with this category
-        const posts = await postModel.deleteMany({categoryId: categoryId});
+        //const posts = await postModel.deleteMany({categoryId: categoryId});
         res.status(200).json({
             message: 'Deleted successfully'
         })       

@@ -1,6 +1,6 @@
 const {body} = require('express-validator');
 const aboutUsModel = require('../models/aboutUsModel');
-const { notify } = require('../routes/aboutUsRoutes');
+//const { notify } = require('../routes/aboutUsRoutes');
 
 
 const name = body('name')
