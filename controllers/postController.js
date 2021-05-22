@@ -66,9 +66,17 @@ exports.findPost = async (req, res, nxt) => {
 exports.createPost = async (req, res, nxt) => {
     try {
         //hold data
-        const title = req.body.title;
-        const content = req.body.content;
-        const categoryId = req.body.categoryId;
+        const facebookpage = req.body.facebookpage;
+        const websitelink = req.body.websitelink;
+        const Posttype = req.body.Posttype;
+        const Productname = req.body.Productname;
+        const Price = req.body.Price
+        const StartupName = req.body.StartupName;
+        // const categoryId = req.body.categoryId;
+        const addressLine = req.body.addressLine;
+        const category = req.body.category;
+        const phone = req.body.phone;
+        const description = req.body.description;
         const user = req.userId;
         let pic = []; 
         //handle files
@@ -79,11 +87,19 @@ exports.createPost = async (req, res, nxt) => {
         }
         //create new object
         const post = new postModel({
-            title: title,
-            content: content,
+            description: description,
             pic: pic,
-            categoryId: categoryId,
-            createdBy: user
+            // categoryId: categoryId,
+            createdBy: user,
+            StartupName: StartupName,
+            addressLine: addressLine,
+            category: category,
+            phone: phone,
+            facebookpage: facebookpage,
+            Posttype: Posttype,
+            websitelink: websitelink,
+            Productname: Productname,
+            Price: Price
         });
         //save in db
         const postt = await post.save();
@@ -118,9 +134,12 @@ exports.updatePost = async (req, res, nxt) => {
             });
         }
         //hold new values
-        const title = req.body.title;
+        const StartupName = req.body.StartupName;
         const content = req.body.content;
-        const category = req.body.categoryId;
+        const category = req.body.category;
+        const categoryId = req.body.categoryId;
+        const addressLine = req.body.addressLine;
+        const specialNote = req.body.specialNote;
         let pic = [];
         //handle files
         if(req.files.length != 0) {
@@ -129,7 +148,10 @@ exports.updatePost = async (req, res, nxt) => {
             })
         }
         //override
-        post.title = title;
+        post.StartupName = StartupName;
+        post.category = category;
+        post.specialNote = specialNote;
+        post.addressLine = addressLine;
         post.content = content;
         post.categoryId = category;
         post.pic = pic;

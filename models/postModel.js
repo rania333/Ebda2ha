@@ -1,17 +1,35 @@
 const mongoose = require('mongoose');
 const schema = mongoose.Schema;
 const postSchema = new schema({
-    title: {
+    StartupName: {
         type: String,
         required: true
     },
-    content: {
+    facebookpage: { type: String},
+    websitelink:  { type: String},
+    Posttype: { type: String},
+    Productname: { type: String},
+    Price: { type: Number},
+     pic: [{
         type: String,
-        required: true,
-    },
-    pic: [{
-        type: String,
+        required: true
     }],
+    description:{
+        type: String,
+        required: true
+    },
+    addressLine:{
+        type: String,
+        required: true
+    },
+    category:{
+        type: String,
+        required: true
+    },
+    phone:{
+        type: Number,
+        required: true
+    },
     approved: {
         type: Boolean,
         default: false
