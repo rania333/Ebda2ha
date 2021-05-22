@@ -12,7 +12,6 @@ module.exports = (req, res, nxt) => {
     try {
         //verify bt decode w verify l token lkn decoder b decode bs
         decodedToken = jwt.verify(token, data.SECRET); //nfs l secret key l x l login function
-
     } catch(err) {
         err.statusCode = 500;
         throw err;

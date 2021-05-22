@@ -1,11 +1,9 @@
 const data = require('./data');
 const nodeMailer = require('nodemailer');
-const smtpTransport = require("nodemailer-smtp-transport");
+const smtpTransport = require('nodemailer-smtp-transport');
 const transporter = nodeMailer.createTransport(smtpTransport({
-   host: 'stmp.gmail.com',
-   service:'gmail',
-   port: 465,
-   secure: true,
+    service: "gmail",
+    host: 'stmp.gmail.com',
     auth: {
         user: data.EMAIL,
         pass: data.PASS

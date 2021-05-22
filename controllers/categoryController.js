@@ -2,7 +2,6 @@ const Category = require('../models/categoryModel');
 const User = require('../models/userModel');
 const {validationResult} = require('express-validator');
 const Posts = require('../models/postModel')
-
 exports.getAllCategory = async(req, res, next) => {
     try{
         const categories = await Category.find()
@@ -141,6 +140,8 @@ exports.deleteCategory = async(req, res, next) => {
             throw error;   
         }
         await Category.findByIdAndRemove(categoryId);
+        //delete all posts with this category
+        const posts = await postModel.deleteMany({categoryId: categoryId});
         res.status(200).json({
             message: 'Deleted successfully'
         })       

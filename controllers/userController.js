@@ -4,6 +4,8 @@ const rendomBytes = require('crypto');
 const {validationResult} = require('express-validator');
 const userModel = require('../models/userModel');
 const mail = require('../sendEmail');
+const postModel = require('../models/postModel');
+const commentModel = require('../models/commentModel');
 
 exports.updateProfile = async (req, res, nxt) => {
     try {
@@ -32,6 +34,11 @@ exports.updateProfile = async (req, res, nxt) => {
         const fb = req.body.facebook;
         const linked =req.body.linkedIn;
         const github =req.body.gitHub;
+        const job = req.body.job;
+        const education = req.body.education;
+        const city = req.body.city;
+        const address = req.body.address;
+        const country = req.body.country;
         //override
         user.firstName = firstName;
         user.lastName = lastName;
@@ -39,9 +46,14 @@ exports.updateProfile = async (req, res, nxt) => {
         user.DOB = DOB;
         user.bio = bio;
         user.summary = summary;
+        user.job = job;
+        user.education = education;
         user.socialLinks.facebook=fb;
         user.socialLinks.linkedIn=linked;
         user.socialLinks.gitHub=github;
+        user.location.city = city;
+        user.location.address = address;
+        user.location.country = country;
         //save in DB
         let updatedUser = await user.save();
         return res.status(200).json({
@@ -60,25 +72,26 @@ exports.updateProfile = async (req, res, nxt) => {
 exports.getAllUsers = async (req, res, nxt) => {
     try {
         let users = await userModel.find({})
-        .select('firstName lastName email verified role pic gender DOB summary bio socialLinks');
+        .select('firstName lastName email verified role pic gender DOB summary bio socialLinks job education location');
         return res.status(200).json({
             message: "You fetched all users successfully",
             search_result: users.length,
             users: users
         });
     } catch (err){
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
     
 };
 
-exports.myProfile = async (req, res, nxt) => {
+exports.myProfile = async (req, res, nxt) => {``
     try {
         const userId = req.userId;
         let user = await userModel.findById(userId,
-            'firstName lastName email verified role pic gender DOB summary bio socialLinks')
+            'firstName lastName email verified role pic gender DOB summary bio socialLinks location job education')
             .populate('posts');
         if (!user) {
             return res.status(404).json({
@@ -95,7 +108,14 @@ exports.myProfile = async (req, res, nxt) => {
             DOB: user.DOB,
             bio: user.bio,
             summary: user.summary,
+            city: user.location.city,
+            country: user.location.country,
+            address: user.location.address,
+            socialLinks: user.socialLinks,
+            education: user.education,
+            job: user.job,
             posts: user.posts.length,
+            comments: user.comments.length
             // message: "you fetched the user successfully",
             // user: user
         });
@@ -119,7 +139,7 @@ exports.filter = async (req, res, nxt) => {
         //hold data
         const name = req.body.name; 
         let user = await userModel.find({$or : [{firstName: {$regex : `.*${name}.*`}}, {lastName: {$regex : `.*${name}.*`}}]})
-        .select('firstName lastName email verified role pic gender DOB summary bio socialLinks')
+        .select('firstName lastName email verified role pic gender DOB summary bio socialLinks job location education')
             if (!user) {
                 return res.status(404).json({
                     message: "user not found"
@@ -131,9 +151,10 @@ exports.filter = async (req, res, nxt) => {
                 user: user.length >0 ? user : "No users Found"
             });
     } catch (err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 };
 
@@ -141,7 +162,7 @@ exports.getUser = async (req, res, nxt) => {
     try {
         const userId = req.params.userId;
         let user = await userModel.findById(userId,
-            'firstName lastName role pic gender DOB summary bio socialLinks')
+            'firstName lastName role pic gender DOB summary bio socialLinks location job education')
             .populate('posts');
         if (!user) {
             return res.status(404).json({
@@ -153,31 +174,49 @@ exports.getUser = async (req, res, nxt) => {
             user: user
         });
     } catch (err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 };
 exports.blockUser = async (req, res, nxt) => {
     try {
         const userId = req.params.userId;
         let user = await userModel.findById(userId)
-        .select('firstName lastName role pic gender DOB summary bio socialLinks');
+        .select('firstName lastName role pic gender DOB summary bio socialLinks job education location');
         if (!user) {
             return res.status(404).json({
                 message: "user not exist"
             });
         }
         let deletedUser = await userModel.findByIdAndRemove(userId);
+        //delete his posts
+        const posts = await postModel.find({createdBy: userId});
+        if(!posts) {
+            return res.status(404).json({
+                "message": "there are no posts"
+            })
+        }
+        await postModel.deleteMany({createdBy: userId});
+        //delete his comments
+        const comments = await commentModel.find({userId: userId});
+        if(!comments) {
+            return res.status(404).json({
+                "message": "there are no comments"
+            })
+        }
+        await commentModel.deleteMany({userId: userId});
         return res.status(200).json({
             message: "user is blocked",
             user: deletedUser,
         });
 
     } catch(err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 }
 
@@ -200,7 +239,7 @@ exports.makeAdmin = async (req, res, nxt) => {
         let message;
         let html;
         const user = await userModel.findOne({email: email})
-        .select('firstName lastName role pic gender DOB summary bio socialLinks');
+        .select('firstName lastName role pic gender DOB summary bio socialLinks education job location');
         if (!user) { //if user not exist then create new one
             const hashPass = await bcrypt.hash(pass, 12);
             const newUser = new userModel ({
@@ -237,9 +276,10 @@ exports.makeAdmin = async (req, res, nxt) => {
             message:  message,
         });
     } catch (err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
     
 }
@@ -284,9 +324,10 @@ exports.changePass = async (req, res, nxt) => {
             message: "you changed your password successfully"
         });
     } catch(err) {
-        return res.status(500).json({
-            message: "an error occured"
-        });
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        nxt(err);
     }
 }
 
@@ -294,7 +335,7 @@ exports.createAvatar = async (req, res, nxt) => {
     try {
         //find user
         let user = await userModel.findById(req.userId)
-        .select('firstName lastName email role bio summary pic socialLinks' );
+        .select('firstName lastName email role bio summary pic socialLinks location job education' );
         if (!user) {
             return res.status(404).json({
                 message: "user not exist"
@@ -326,7 +367,7 @@ exports.deleteAvatar = async (req, res, nxt) => {
     try {
         //find user
         let user = await userModel.findById(req.userId)
-        .select('firstName lastName email role bio summary pic socialLinks' );
+        .select('firstName lastName email role bio summary pic socialLinks job education location' );
         if (!user) {
             return res.status(404).json({
                 message: "user not exist"

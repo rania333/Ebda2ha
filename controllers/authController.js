@@ -213,8 +213,15 @@ exports.postNewPass = async (req, res, nxt) => {
                 message: "your password is reset successfully"
             });
         }
+        let hashPass = await bcrypt.hash(password, 12);
+        //edit in model w a5ly kol 7aga zy ma kant
+        user.password = hashPass;
+        user.resetPassToken = undefined//////////;
+        let response = await user.save();
+        res.status(200).json({
+            message: "your password is reset successfully"
+        });
     } catch (err) {
-        nxt(err);
         return res.status(401).json({
             message: `the token is expired! try to request reset password again from http://localhost:3000/auth/resetPassword`
         });

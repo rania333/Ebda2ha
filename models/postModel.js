@@ -1,31 +1,13 @@
 const mongoose = require('mongoose');
 const schema = mongoose.Schema;
 const postSchema = new schema({
-    title: {   //start up name
+    StartupName: { //name l product w l startup
         type: String,
+        required: true
     },
-    content: {  //description about product
+    description: { //description
         type: String,
         required: true,
-    },
-    price: {
-        type: String
-    },
-    fbPage: {
-        type: String
-    },
-    WebsiteLink: {
-        type: String
-    },
-    Phone: {
-        type: Number
-    },
-    Address: {
-        type: String
-    },
-    Target: {
-        type: String,
-        enum: ['Marketing', 'Fund']
     },
     pic: [{
         type: String,
@@ -33,6 +15,35 @@ const postSchema = new schema({
     approved: {
         type: Boolean,
         default: false
+    },
+    facebookpage: {
+        type: String,
+    },
+    websitelink: {
+        type: String,
+    },
+    phone: {
+        type: Number,
+        required: true
+    },
+    addressLine: {
+        type: String,
+        required: true
+    },
+    price: {
+        type: String
+    },
+    productname: {
+        type: String,
+    },
+    posttype: {
+        type: String,
+        enum: ['marketing', 'Fund']
+    },
+    category:{
+        type: String,
+        required: true,
+        enum: ['productForm' , 'startupForm']
     },
     categoryId: {
         type: schema.Types.ObjectId,
@@ -43,13 +54,11 @@ const postSchema = new schema({
         type: schema.Types.ObjectId,
         ref: 'User'
     },
-    typed: {
-        type: String,
-        required: true,
-        enum : ['startUp', 'product']
-    }
+    comments: [{
+        type: schema.Types.ObjectId,
+        ref: 'Comment'
+    }]
 }, {
     timestamps: true
 });
 module.exports = mongoose.model('post', postSchema);
-
