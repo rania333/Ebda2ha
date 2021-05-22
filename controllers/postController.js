@@ -237,6 +237,7 @@ exports.deletePost = async (req, res, nxt) => {
         }
         user.posts.pull(postId);
         await user.save();
+
         return res.status(200).json({
             message: 'the post is deleted successfully',
             post: result
@@ -348,7 +349,6 @@ exports.search = async (req, res, nxt) =>{
             {$and:[{StartupName: {$in: mappedArr}}, {approved: true}]}]})
             .populate('createdBy', {firstName:1, lastName:1})
             .populate('categoryId', {name:  1})
-            .populate('categoryId', {name:  1})
             .populate({
                 path: 'comments',
                 select: 'content',
@@ -357,7 +357,7 @@ exports.search = async (req, res, nxt) =>{
                     model: 'User',
                     select: 'firstName lastName pic'
                 }
-        }).exec()
+            })
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage)
             .sort({createdAt: -1});
@@ -391,6 +391,7 @@ exports.getAllUnapprovedPost = async (req, res, nxt) => {
             });
         }
         const posts = await postModel.find({approved: false})
+        .populate('categoryId', {name: 1})
         .sort({createdAt: -1})
         .skip((page - 1) * itemsPerPage)
         .limit(itemsPerPage);;
@@ -416,9 +417,14 @@ exports.approvPost = async (req, res, nxt) => {
             });
         }
         const post = await postModel.findById(postId);
+        if(!post) {
+            return res.status(404).json({
+                message: "post is not found"
+            })
+        }
         post.approved = true;
         await post.save();
-        return res.status(404).json({
+        return res.status(200).json({
             message: "post is approved successfully",
             post: post
         })
