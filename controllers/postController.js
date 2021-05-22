@@ -345,7 +345,7 @@ exports.search = async (req, res, nxt) =>{
         user.save();
         //l database
         const post = await postModel.find({$or: [{$and:[{description: {$in: mappedArr}}, {approved: true}]}, 
-            {$and:[{title: {$in: mappedArr}}, {approved: true}]}]})
+            {$and:[{StartupName: {$in: mappedArr}}, {approved: true}]}]})
             .populate('createdBy', {firstName:1, lastName:1})
             .populate('categoryId', {name:  1})
             .populate('categoryId', {name:  1})
