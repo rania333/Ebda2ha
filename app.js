@@ -30,7 +30,7 @@ app.use((req, res, nxt) => {
     nxt();
 });
 /***** end middlewares ********/
-
+//process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 /* start routes */
 app.use('/auth', authRoutes);
 app.use('/profile', userRoutes);

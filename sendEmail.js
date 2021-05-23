@@ -25,5 +25,3 @@ exports.sendEmail = (email, subject, html) => {
     });
 
 }
-
-

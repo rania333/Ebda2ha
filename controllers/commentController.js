@@ -1,9 +1,17 @@
 const commentModel = require('../models/commentModel');
 const postModel = require('../models/postModel');
 const userModel = require('../models/userModel');
+const {validationResult} = require('express-validator');
 const itemsPerPage = 6; 
 exports.createComment = async (req, res, nxt) => {
     try{
+        //validation
+        const errors = await validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({
+                errors: errors.array()
+            });
+        }
         const content = req.body.content;
         const userId = req.userId;
         const postId = req.baseUrl.split('/')[2];
