@@ -70,7 +70,6 @@ exports.registerValidation = [firstName, lastName, email, password];
 exports.logInValidation = [email2, password];
 exports.getResetPass = [email2];
 exports.postResetPass = [password, confirmPass];
-exports.updateProfile = [firstName, lastName, bio, summary, fb, linkedIn, gitHub];
 exports.makeAdmin = [email2];
 exports.changePass = [oldPass, newPass, confirmPass2];
 exports.filter = [name2];

@@ -14,8 +14,8 @@ postController.createPost, (err, req, res, nxt) => { //l rab3a de to handle erro
         error: err.message
     });
 });//by title, content , categoryId,pic
-router.get('/search',validation.search, isAuth, postController.search);//by key
-router.get('/filter',validation.filter, isAuth, postController.filter);//by categoryId
+router.get('/search', isAuth, postController.search);//by key
+router.get('/filter', isAuth, postController.filter);//by categoryId
 router.get('/approve', isAuth, isAdmin, postController.getAllUnapprovedPost); //for admin
 router.get('/:postId', isAuth, postController.findPost);
 router.get('/', isAuth, postController.getAllPost);

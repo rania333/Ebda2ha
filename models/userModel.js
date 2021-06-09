@@ -6,11 +6,11 @@ const schema = mongoose.Schema;
 const userModel = new schema({
     firstName: {
         type: String ,
-        required: true
+        // required: true
     },
     lastName: {
         type: String ,
-        required: true
+        // required: true
     },
     email: {
         type: String,
@@ -45,7 +45,6 @@ const userModel = new schema({
     summary: {
         type: String
     },
-    socialLinks: {
         facebook: {
             type: String,
         },
@@ -54,9 +53,7 @@ const userModel = new schema({
         },
         gitHub: {
             type: String
-        }
-    },
-    location: {
+        },
         address: {
             type: String,
         },
@@ -65,8 +62,7 @@ const userModel = new schema({
         },
         country: {
             type: String
-        }
-    },
+        },
     verified: {
         type: Boolean,
         default: false

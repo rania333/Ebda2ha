@@ -10,14 +10,14 @@ const commentModel = require('../models/commentModel');
 exports.updateProfile = async (req, res, nxt) => {
     try {
         //validation
-        const errors = await validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({
-                errors: errors.array()
-            });
-        }
+        // const errors = await validationResult(req);
+        // if (!errors.isEmpty()) {
+        //     return res.status(422).json({
+        //         errors: errors.array()
+        //     });
+        // }
         //find user
-        let user = await userModel.findById(req.userId).select('firstName lastName email role bio summary pic socialLinks' );
+        let user = await userModel.findById(req.userId);
         if (!user) {
             return res.status(404).json({
                 message: "user not exist"
@@ -40,20 +40,20 @@ exports.updateProfile = async (req, res, nxt) => {
         const address = req.body.address;
         const country = req.body.country;
         //override
-        user.firstName = firstName;
-        user.lastName = lastName;
+        user.firstName = firstName?firstName:user.firstName;
+        user.lastName = lastName?lastName:user.lastName;
         user.gender = gender;
         user.DOB = DOB;
         user.bio = bio;
         user.summary = summary;
         user.job = job;
         user.education = education;
-        user.socialLinks.facebook=fb;
-        user.socialLinks.linkedIn=linked;
-        user.socialLinks.gitHub=github;
-        user.location.city = city;
-        user.location.address = address;
-        user.location.country = country;
+        user.facebook=fb;
+        user.linkedIn=linked;
+        user.gitHub=github;
+        user.city = city;
+        user.address = address;
+        user.country = country;
         //save in DB
         let updatedUser = await user.save();
         return res.status(200).json({
@@ -68,6 +68,7 @@ exports.updateProfile = async (req, res, nxt) => {
         nxt(err);
     }
 }; 
+
 
 exports.getAllUsers = async (req, res, nxt) => {
     try {
@@ -91,7 +92,7 @@ exports.myProfile = async (req, res, nxt) => {``
     try {
         const userId = req.userId;
         let user = await userModel.findById(userId,
-            'firstName lastName email verified role pic gender DOB summary bio socialLinks location job education')
+            'firstName lastName email verified role pic gender DOB summary bio socialLinks location job education city address country')
             .populate('posts');
         if (!user) {
             return res.status(404).json({
@@ -108,14 +109,14 @@ exports.myProfile = async (req, res, nxt) => {``
             DOB: user.DOB,
             bio: user.bio,
             summary: user.summary,
-            city: user.location.city,
-            country: user.location.country,
-            address: user.location.address,
-            socialLinks: user.socialLinks,
+            city: user.city,
+            country: user.country,
+            address: user.address,
             education: user.education,
             job: user.job,
             posts: user.posts.length,
-            comments: user.comments.length
+            posts: user.posts,
+            // comments: user.comments.length
             // message: "you fetched the user successfully",
             // user: user
         });
@@ -352,7 +353,7 @@ exports.createAvatar = async (req, res, nxt) => {
         //save in DB
         let updatedUser = await user.save();
         return res.status(200).json({
-            message: "updated successfully",
+            // message: "updated successfully",
             user: updatedUser
         });
     } catch (err) {

@@ -4,10 +4,10 @@ const {validationResult} = require('express-validator');
 const Posts = require('../models/postModel')
 exports.getAllCategory = async(req, res, next) => {
     try{
-        const categories = await Category.find()
+        const categories = await Category.find().select('name')
         .populate('adminId', 'firstName lastName')
         res.status(200).json({
-            message: 'Fetched all data successfully',
+            // message: 'Fetched all data successfully',
             categories: categories
         })
     }catch(err) {

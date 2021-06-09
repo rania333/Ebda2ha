@@ -10,10 +10,10 @@ const fileStorage = multer.diskStorage({
 const upload = multer({
     storage: fileStorage,
     limits: {
-        fileSize: 1000000 //1 million y3ni 3mb
+        fileSize: 7000000 //1 million y3ni 3mb
     },
     fileFilter(req, file, cb) {
-        if(!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+        if(!file.originalname.match(/\.(JPG|jpeg|png|jpg|PNG|JPEG)$/)) {
             return cb(new Error('please upload images only'))
         }
         cb(undefined, true); //y3ni a2bl l file

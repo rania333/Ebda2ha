@@ -7,11 +7,11 @@ const isAdmin = require('../middleware/isAdmin');
 
 const router = express.Router(); 
 
-router.get('/', isAuth, isAdmin, categoryController.getAllCategory); //get all category
+router.get('/', isAuth,  categoryController.getAllCategory); //get all category
 
 router.get('/:categoryId', isAuth, isAdmin, categoryController.getCategory); //get single category
 
-router.post('/', isAuth, isAdmin, validation.addCategoryValidation, categoryController.AddCategory); //create
+router.post('/', isAuth,  validation.addCategoryValidation, categoryController.AddCategory); //create
 
 router.put('/:categoryId', isAuth, isAdmin, validation.updateCategoryValidation, categoryController.updateCategory); //update
 

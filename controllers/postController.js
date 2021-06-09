@@ -63,26 +63,27 @@ exports.findPost = async (req, res, nxt) => {
         //hold data
         const postId = req.params.postId;
         const post = await postModel.findById(postId)
-        .sort({createdAt: -1}).populate('createdBy',
-        {firstName:1, lastName:1})
-        .populate('categoryId', {name:  1})
-        .populate({
-            path: 'comments',
-            select: 'content',
-            populate: {
-                path: 'userId',
-                model: 'User',
-                select: 'firstName lastName pic'
-            }
-        }).exec()
+        // .sort({createdAt: -1}).populate('createdBy',
+        // {firstName:1, lastName:1})
+        // .populate('categoryId', {name:  1})
+        // .populate({
+        //     path: 'comments',
+        //     select: 'content',
+        //     populate: {
+        //         path: 'userId',
+        //         model: 'User',
+        //         select: 'firstName lastName pic'
+        //     }
+        // })
+        .exec()
         if(!post || !post.approved) {
             return res.status(404).json({
                 message: "this post is not found"
             })
         }
         return res.status(200).json({
-            message: `the post ${postId} is retrieved successfully`,
-            post: post
+            // message: `the post ${postId} is retrieved successfully`,
+            post
         });
     } catch(err) {
         if (!err.statusCode) {
@@ -94,16 +95,19 @@ exports.findPost = async (req, res, nxt) => {
 
 exports.createPost = async (req, res, nxt) => {
     try {
-        //validation
+        console.log(req)
+        // validation
         const errors = await validationResult(req);
+       
         if (!errors.isEmpty()) {
+            console.log(errors.array())
             return res.status(422).json({
                 errors: errors.array()
             });
         }
         //hold data
         const {StartupName, description, facebookpage, websitelink, phone, 
-            addressLine, price, productname, posttype, category, categoryId} = req.body;
+            addressLine, Price, Productname, Posttype, category,Category,categoryId} = req.body;
         const user = req.userId;
         let pic = []; 
         //handle files
@@ -121,13 +125,15 @@ exports.createPost = async (req, res, nxt) => {
             websitelink,
             phone,
             addressLine,
-            price,
-            productname,
-            posttype,
+            Price,
+            Productname,
+            Posttype,
             pic,
             category,
+            Category,
             createdBy: user
         });
+        
         //save in db
         const postt = await post.save();
         //add it to userModel
