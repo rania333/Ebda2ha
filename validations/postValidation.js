@@ -1,6 +1,10 @@
 const {body} = require('express-validator');
 const postModel = require('../models/postModel');
+<<<<<<< HEAD
 // const { notify } = require('../routes/postRoutes');
+=======
+//const { notify } = require('../routes/postRoutes');
+>>>>>>> 65c430c5e1920ea53513ecb38fc813240aa25835
 
 // const StartupName = body('StartupName')
 // .exists().withMessage('please enter a title for your post')

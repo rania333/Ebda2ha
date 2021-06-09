@@ -1,6 +1,6 @@
 const {body} = require('express-validator');
 const categoryModel = require('../models/categoryModel');
-const { notify } = require('../routes/categoryRoutes');
+//const { notify } = require('../routes/categoryRoutes');
 
 const Name = body('name').trim()
 .exists().withMessage('enter a category name')

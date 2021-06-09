@@ -1,6 +1,6 @@
 const {body} = require('express-validator');
 const userModel = require('../models/userModel');
-const { notify } = require('../routes/authRoutes');
+//const { notify } = require('../routes/authRoutes');
 
 const firstName = body('firstName').trim()
 .exists().withMessage('enter your first name')
