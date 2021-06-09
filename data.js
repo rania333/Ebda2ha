@@ -3,6 +3,7 @@
 const dotenv = require('dotenv');
 dotenv.config()
 
+
 exports.DB = process.env.APP_DB
 exports.SECRET = process.env.APP_SECRET
 exports.DOMAIN = process.env.APP_DOMAIN
