@@ -50,7 +50,6 @@ mongoose.connect(data.DB,
     const server = app.listen(data.PORT, () => {
         console.log(`Server is listening to port ${data.PORT}`);
     }) ;
-
     //NEW! 
     const io = require('socket.io')(server, {
         cors: {
