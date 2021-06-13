@@ -13,6 +13,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const postRoutes = require('./routes/postRoutes');
 const aboutusRoutes = require('./routes/aboutUsRoutes');
 const commentRoutes = require('./routes/commentRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use('/category', categoryRoutes);
 app.use('/post/:postId/comment', commentRoutes);
 app.use('/post', postRoutes);
 app.use('/aboutus', aboutusRoutes);
+app.use('/message', messageRoutes);
 /* end routes */
 
 /* start database & server */
