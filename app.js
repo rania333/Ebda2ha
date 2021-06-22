@@ -13,6 +13,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const postRoutes = require('./routes/postRoutes');
 const aboutusRoutes = require('./routes/aboutUsRoutes');
 const commentRoutes = require('./routes/commentRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 
 const app = express();
 
@@ -38,15 +39,35 @@ app.use('/category', categoryRoutes);
 app.use('/post/:postId/comment', commentRoutes);
 app.use('/post', postRoutes);
 app.use('/aboutus', aboutusRoutes);
+app.use('/message', messageRoutes);
 /* end routes */
 
-/* start database & server */
+/* start database & server & socket.io*/
+
 mongoose.connect(data.DB, 
 { useUnifiedTopology: true , useNewUrlParser: true, useFindAndModify: false})
 .then(() => {
-    app.listen(data.PORT, () => {
+    const server = app.listen(data.PORT, () => {
         console.log(`Server is listening to port ${data.PORT}`);
     }) ;
+    //NEW! 
+    const io = require('socket.io')(server, {
+        cors: {
+            origin: '*',
+            methods: ['GET', 'POST', 'PUT'],
+            credentials: true
+        }
+    });
+    io.on('connection', socket => {
+        // connection between server and client
+        const { id } = socket.client;
+        console.log(`Client connected: ${id}`);
+
+        //chat_message is an  will use in the front
+        socket.on('chat_message', msg => {
+            console.log(`user "${id}" sent: ${msg}`);
+        });
+    });
 })
 .catch(err => {
     console.log(err)

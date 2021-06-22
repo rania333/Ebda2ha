@@ -31,6 +31,7 @@
     "nodemailer-smtp-transport": "^2.7.4",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
+    "socket.io": "^4.1.2",
     "wndb-with-exceptions": "^3.0.2",
     "wordnet": "^0.1.2"
   }
