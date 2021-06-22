@@ -24,7 +24,7 @@ var commentModel = require('../models/commentModel');
 var itemsPerPage = 6;
 
 exports.getAllPost = function _callee(req, res, nxt) {
-  var condition, mappedArr, user, userInterests, page, posts;
+  var condition, mappedArr, user, page, posts;
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
@@ -35,38 +35,22 @@ exports.getAllPost = function _callee(req, res, nxt) {
 
         case 3:
           user = _context.sent;
-          userInterests = user.interests;
+          // const userInterests = user.interests;
           page = req.query.page ? parseInt(req.query.page) : 1; //for pagination
           //checkif user has interests or not 
+          // if(userInterests.length <= 0) {
+          //     condition = {approved: true}
+          // } else {
+          //     //regulare expression
+          //     mappedArr = [...userInterests.map(el => {
+          //         return new RegExp(el, "i");
+          //     })]
+          //     condition = {$and:[{approved: true},
+          //         {$or: [{description: {$in: mappedArr}}, {StartupName: {$in: mappedArr}}]}]}
+          // }
+          //find
 
-          if (userInterests.length <= 0) {
-            condition = {
-              approved: true
-            };
-          } else {
-            //regulare expression
-            mappedArr = _toConsumableArray(userInterests.map(function (el) {
-              return new RegExp(el, "i");
-            }));
-            condition = {
-              $and: [{
-                approved: true
-              }, {
-                $or: [{
-                  description: {
-                    $in: mappedArr
-                  }
-                }, {
-                  StartupName: {
-                    $in: mappedArr
-                  }
-                }]
-              }]
-            };
-          } //find
-
-
-          _context.next = 9;
+          _context.next = 7;
           return regeneratorRuntime.awrap(postModel.find(condition) //condition on retrieved posts
           .populate('createdBy', {
             firstName: 1,
@@ -85,11 +69,11 @@ exports.getAllPost = function _callee(req, res, nxt) {
             createdAt: -1
           }));
 
-        case 9:
+        case 7:
           posts = _context.sent;
 
           if (posts) {
-            _context.next = 12;
+            _context.next = 10;
             break;
           }
 
@@ -97,15 +81,15 @@ exports.getAllPost = function _callee(req, res, nxt) {
             "message": "no posts found"
           }));
 
-        case 12:
+        case 10:
           return _context.abrupt("return", res.status(200).json({
             message: 'posts are fetched successfully',
             search_Result: posts.length,
             posts: posts.length > 0 ? posts : "No Posts Found"
           }));
 
-        case 15:
-          _context.prev = 15;
+        case 13:
+          _context.prev = 13;
           _context.t0 = _context["catch"](0);
 
           if (!_context.t0.statusCode) {
@@ -114,12 +98,12 @@ exports.getAllPost = function _callee(req, res, nxt) {
 
           nxt(_context.t0);
 
-        case 19:
+        case 17:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[0, 15]]);
+  }, null, null, [[0, 13]]);
 };
 
 exports.findPost = function _callee2(req, res, nxt) {
@@ -132,19 +116,22 @@ exports.findPost = function _callee2(req, res, nxt) {
           //hold data
           postId = req.params.postId;
           _context2.next = 4;
-          return regeneratorRuntime.awrap(postModel.findById(postId) // .sort({createdAt: -1}).populate('createdBy',
-          // {firstName:1, lastName:1})
-          // .populate('categoryId', {name:  1})
-          // .populate({
-          //     path: 'comments',
-          //     select: 'content',
-          //     populate: {
-          //         path: 'userId',
-          //         model: 'User',
-          //         select: 'firstName lastName pic'
-          //     }
-          // })
-          .exec());
+          return regeneratorRuntime.awrap(postModel.findById(postId).sort({
+            createdAt: -1
+          }).populate('createdBy', {
+            firstName: 1,
+            lastName: 1
+          }).populate('categoryId', {
+            name: 1
+          }).populate({
+            path: 'comments',
+            select: 'content',
+            populate: {
+              path: 'userId',
+              model: 'User',
+              select: 'firstName lastName pic'
+            }
+          }).exec());
 
         case 4:
           post = _context2.sent;
@@ -183,23 +170,21 @@ exports.findPost = function _callee2(req, res, nxt) {
 };
 
 exports.createPost = function _callee3(req, res, nxt) {
-  var errors, _req$body, StartupName, description, facebookpage, websitelink, phone, addressLine, Price, Productname, Posttype, category, Category, categoryId, user, pic, post, postt, usermodel;
+  var errors, _req$body, StartupName, description, facebookpage, websitelink, phone, addressLine, Price, Productname, Posttype, category, Category, _categoryId, user, pic, post, postt, usermodel;
 
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
       switch (_context3.prev = _context3.next) {
         case 0:
           _context3.prev = 0;
-          console.log(req); // validation
-
-          _context3.next = 4;
+          _context3.next = 3;
           return regeneratorRuntime.awrap(validationResult(req));
 
-        case 4:
+        case 3:
           errors = _context3.sent;
 
           if (errors.isEmpty()) {
-            _context3.next = 8;
+            _context3.next = 7;
             break;
           }
 
@@ -208,9 +193,9 @@ exports.createPost = function _callee3(req, res, nxt) {
             errors: errors.array()
           }));
 
-        case 8:
+        case 7:
           //hold data
-          _req$body = req.body, StartupName = _req$body.StartupName, description = _req$body.description, facebookpage = _req$body.facebookpage, websitelink = _req$body.websitelink, phone = _req$body.phone, addressLine = _req$body.addressLine, Price = _req$body.Price, Productname = _req$body.Productname, Posttype = _req$body.Posttype, category = _req$body.category, Category = _req$body.Category, categoryId = _req$body.categoryId;
+          _req$body = req.body, StartupName = _req$body.StartupName, description = _req$body.description, facebookpage = _req$body.facebookpage, websitelink = _req$body.websitelink, phone = _req$body.phone, addressLine = _req$body.addressLine, Price = _req$body.Price, Productname = _req$body.Productname, Posttype = _req$body.Posttype, category = _req$body.category, Category = _req$body.Category, _categoryId = _req$body.categoryId;
           user = req.userId;
           pic = []; //handle files
 
@@ -224,7 +209,7 @@ exports.createPost = function _callee3(req, res, nxt) {
           post = new postModel({
             StartupName: StartupName,
             description: description,
-            categoryId: categoryId,
+            categoryId: _categoryId,
             facebookpage: facebookpage,
             websitelink: websitelink,
             phone: phone,
@@ -238,28 +223,28 @@ exports.createPost = function _callee3(req, res, nxt) {
             createdBy: user
           }); //save in db
 
-          _context3.next = 15;
+          _context3.next = 14;
           return regeneratorRuntime.awrap(post.save());
 
-        case 15:
+        case 14:
           postt = _context3.sent;
-          _context3.next = 18;
+          _context3.next = 17;
           return regeneratorRuntime.awrap(userModel.findById(user));
 
-        case 18:
+        case 17:
           usermodel = _context3.sent;
           usermodel.posts.push(post);
-          _context3.next = 22;
+          _context3.next = 21;
           return regeneratorRuntime.awrap(usermodel.save());
 
-        case 22:
+        case 21:
           return _context3.abrupt("return", res.status(201).json({
-            message: "your post is created successfully",
+            // message: "your post is created successfully",
             post: postt
           }));
 
-        case 25:
-          _context3.prev = 25;
+        case 24:
+          _context3.prev = 24;
           _context3.t0 = _context3["catch"](0);
 
           if (!_context3.t0.statusCode) {
@@ -268,16 +253,16 @@ exports.createPost = function _callee3(req, res, nxt) {
 
           nxt(_context3.t0);
 
-        case 29:
+        case 28:
         case "end":
           return _context3.stop();
       }
     }
-  }, null, null, [[0, 25]]);
+  }, null, null, [[0, 24]]);
 };
 
 exports.updatePost = function _callee4(req, res, nxt) {
-  var errors, postId, post, _req$body2, StartupName, description, facebookpage, websitelink, phone, addressLine, price, productname, posttype, category, categoryId, pic, updatedPost;
+  var errors, postId, post, _req$body2, StartupName, description, facebookpage, websitelink, phone, addressLine, price, productname, posttype, category, pic, updatedPost;
 
   return regeneratorRuntime.async(function _callee4$(_context4) {
     while (1) {
@@ -330,7 +315,7 @@ exports.updatePost = function _callee4(req, res, nxt) {
 
         case 14:
           //hold new values
-          _req$body2 = req.body, StartupName = _req$body2.StartupName, description = _req$body2.description, facebookpage = _req$body2.facebookpage, websitelink = _req$body2.websitelink, phone = _req$body2.phone, addressLine = _req$body2.addressLine, price = _req$body2.price, productname = _req$body2.productname, posttype = _req$body2.posttype, category = _req$body2.category, categoryId = _req$body2.categoryId;
+          _req$body2 = req.body, StartupName = _req$body2.StartupName, description = _req$body2.description, facebookpage = _req$body2.facebookpage, websitelink = _req$body2.websitelink, phone = _req$body2.phone, addressLine = _req$body2.addressLine, price = _req$body2.price, productname = _req$body2.productname, posttype = _req$body2.posttype, category = _req$body2.category;
           pic = []; //handle files
 
           if (req.files != undefined) {
@@ -519,11 +504,11 @@ exports.filter = function _callee6(req, res, nxt) {
           _context6.next = 11;
           return regeneratorRuntime.awrap(postModel.find({
             categoryId: category
+          }, {
+            approved: true
           }).populate('createdBy', {
             firstName: 1,
             lastName: 1
-          }).populate('categoryId', {
-            name: 1
           }).populate('categoryId', {
             name: 1
           }).populate({
@@ -534,7 +519,7 @@ exports.filter = function _callee6(req, res, nxt) {
               model: 'User',
               select: 'firstName lastName pic'
             }
-          }).exec().skip((page - 1) * itemsPerPage).limit(itemsPerPage).sort({
+          }).skip((page - 1) * itemsPerPage).limit(itemsPerPage).sort({
             createdAt: -1
           }));
 
@@ -550,7 +535,7 @@ exports.filter = function _callee6(req, res, nxt) {
           return _context6.abrupt("return", res.status(200).json({
             message: 'the posts are retrieved successfully',
             search_Result: arr.length,
-            posts: arr.length > 0 ? arr : "No Posts Found"
+            posts: posts.length > 0 ? posts : "No Posts Found"
           }));
 
         case 16:
@@ -594,7 +579,7 @@ exports.search = function _callee7(req, res, nxt) {
           }));
 
         case 6:
-          key = req.body.key;
+          key = req.query.key;
           arr = [];
           uniqueArray = [];
           page = req.query.page ? parseInt(req.query.page) : 1; //for pagination

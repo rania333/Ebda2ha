@@ -11,19 +11,19 @@ exports.getAllPost = async (req, res, nxt) => {
         let mappedArr;
         //to track user
         const user = await userModel.findById(req.userId);
-        const userInterests = user.interests;
+        // const userInterests = user.interests;
         const page = req.query.page ? parseInt(req.query.page) : 1; //for pagination
         //checkif user has interests or not 
-        if(userInterests.length <= 0) {
-            condition = {approved: true}
-        } else {
-            //regulare expression
-            mappedArr = [...userInterests.map(el => {
-                return new RegExp(el, "i");
-            })]
-            condition = {$and:[{approved: true},
-                {$or: [{description: {$in: mappedArr}}, {StartupName: {$in: mappedArr}}]}]}
-        }
+        // if(userInterests.length <= 0) {
+        //     condition = {approved: true}
+        // } else {
+        //     //regulare expression
+        //     mappedArr = [...userInterests.map(el => {
+        //         return new RegExp(el, "i");
+        //     })]
+        //     condition = {$and:[{approved: true},
+        //         {$or: [{description: {$in: mappedArr}}, {StartupName: {$in: mappedArr}}]}]}
+        // }
         //find
         const posts = await postModel.find(condition) //condition on retrieved posts
         .populate('createdBy', {firstName:1, lastName:1}) 
@@ -63,18 +63,18 @@ exports.findPost = async (req, res, nxt) => {
         //hold data
         const postId = req.params.postId;
         const post = await postModel.findById(postId)
-        // .sort({createdAt: -1}).populate('createdBy',
-        // {firstName:1, lastName:1})
-        // .populate('categoryId', {name:  1})
-        // .populate({
-        //     path: 'comments',
-        //     select: 'content',
-        //     populate: {
-        //         path: 'userId',
-        //         model: 'User',
-        //         select: 'firstName lastName pic'
-        //     }
-        // })
+        .sort({createdAt: -1})
+        .populate('createdBy',{firstName:1, lastName:1})
+        .populate('categoryId', {name:  1})
+        .populate({
+            path: 'comments',
+            select: 'content',
+            populate: {
+                path: 'userId',
+                model: 'User',
+                select: 'firstName lastName pic'
+            }
+        })
         .exec()
         if(!post || !post.approved) {
             return res.status(404).json({
@@ -95,7 +95,6 @@ exports.findPost = async (req, res, nxt) => {
 
 exports.createPost = async (req, res, nxt) => {
     try {
-        console.log(req)
         // validation
         const errors = await validationResult(req);
        
@@ -141,7 +140,7 @@ exports.createPost = async (req, res, nxt) => {
         usermodel.posts.push(post);
         await usermodel.save();
         return res.status(201).json({
-            message: "your post is created successfully",
+            // message: "your post is created successfully",
             post: postt
         });
     } catch (err) {
@@ -176,7 +175,7 @@ exports.updatePost = async (req, res, nxt) => {
         }
         //hold new values
         const {StartupName, description, facebookpage, websitelink, phone, 
-            addressLine, price, productname, posttype, category, categoryId} = req.body;
+            addressLine, price, productname, posttype, category} = req.body;
         let pic = [];
         //handle files
         if(req.files != undefined) {
@@ -270,9 +269,8 @@ exports.filter = async (req, res, nxt) => {
         const category = req.body.categoryId;
         var arr = [];
         const page = req.query.page ? parseInt(req.query.page) : 1; //for pagination
-        const posts = await postModel.find({categoryId: category}).populate('createdBy',
+        const posts = await postModel.find({categoryId: category},{approved: true}).populate('createdBy',
         {firstName:1, lastName:1})
-        .populate('categoryId', {name:  1})
         .populate('categoryId', {name:  1})
         .populate({
             path: 'comments',
@@ -282,7 +280,7 @@ exports.filter = async (req, res, nxt) => {
                 model: 'User',
                 select: 'firstName lastName pic'
             }
-        }).exec()
+        })
         .skip((page - 1) * itemsPerPage)
         .limit(itemsPerPage)
         .sort({createdAt: -1})
@@ -296,7 +294,7 @@ exports.filter = async (req, res, nxt) => {
         return res.status(200).json({
             message: 'the posts are retrieved successfully',
             search_Result: arr.length,
-            posts: arr.length>0 ? arr : "No Posts Found"
+            posts: posts.length>0 ? posts : "No Posts Found"
         })
     } catch(err) {
         if (!err.statusCode) {
@@ -316,7 +314,7 @@ exports.search = async (req, res, nxt) =>{
             });
         }
 
-        const key = req.body.key;
+        const key = req.query.key;
         let arr = [];
         let uniqueArray = [];
         const page = req.query.page ? parseInt(req.query.page) : 1; //for pagination

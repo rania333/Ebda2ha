@@ -20,20 +20,36 @@ var postModel = require('../models/postModel');
 var commentModel = require('../models/commentModel');
 
 exports.updateProfile = function _callee(req, res, nxt) {
-  var user, firstName, lastName, gender, DOB, bio, summary, fb, linked, github, job, education, city, address, country, updatedUser;
+  var errors, user, firstName, lastName, gender, DOB, bio, summary, fb, linked, github, job, education, city, address, country, updatedUser;
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
           _context.prev = 0;
           _context.next = 3;
-          return regeneratorRuntime.awrap(userModel.findById(req.userId));
+          return regeneratorRuntime.awrap(validationResult(req));
 
         case 3:
+          errors = _context.sent;
+
+          if (errors.isEmpty()) {
+            _context.next = 6;
+            break;
+          }
+
+          return _context.abrupt("return", res.status(422).json({
+            errors: errors.array()
+          }));
+
+        case 6:
+          _context.next = 8;
+          return regeneratorRuntime.awrap(userModel.findById(req.userId));
+
+        case 8:
           user = _context.sent;
 
           if (user) {
-            _context.next = 6;
+            _context.next = 11;
             break;
           }
 
@@ -41,7 +57,7 @@ exports.updateProfile = function _callee(req, res, nxt) {
             message: "user not exist"
           }));
 
-        case 6:
+        case 11:
           //hold data 
           firstName = req.body.firstName;
           lastName = req.body.lastName;
@@ -74,18 +90,18 @@ exports.updateProfile = function _callee(req, res, nxt) {
           user.address = address;
           user.country = country; //save in DB
 
-          _context.next = 36;
+          _context.next = 41;
           return regeneratorRuntime.awrap(user.save());
 
-        case 36:
+        case 41:
           updatedUser = _context.sent;
           return _context.abrupt("return", res.status(200).json({
             message: "updated successfully",
             user: updatedUser
           }));
 
-        case 40:
-          _context.prev = 40;
+        case 45:
+          _context.prev = 45;
           _context.t0 = _context["catch"](0);
 
           if (!_context.t0.statusCode) {
@@ -94,12 +110,12 @@ exports.updateProfile = function _callee(req, res, nxt) {
 
           nxt(_context.t0);
 
-        case 44:
+        case 49:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[0, 40]]);
+  }, null, null, [[0, 45]]);
 };
 
 exports.getAllUsers = function _callee2(req, res, nxt) {
@@ -140,7 +156,9 @@ exports.getAllUsers = function _callee2(req, res, nxt) {
 
 exports.myProfile = function _callee3(req, res, nxt) {
   "";
-  var userId, user;
+
+  var _res$status$json, userId, user;
+
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
       switch (_context3.prev = _context3.next) {
@@ -148,7 +166,14 @@ exports.myProfile = function _callee3(req, res, nxt) {
           _context3.prev = 0;
           userId = req.userId;
           _context3.next = 4;
-          return regeneratorRuntime.awrap(userModel.findById(userId, 'firstName lastName email verified role pic gender DOB summary bio socialLinks location job education city address country').populate('posts'));
+          return regeneratorRuntime.awrap(userModel.findById(userId, 'firstName lastName email verified role pic gender DOB summary bio socialLinks location job education city address country').populate({
+            path: 'posts',
+            populate: {
+              path: 'categoryId',
+              model: 'Category',
+              select: 'name'
+            }
+          }));
 
         case 4:
           user = _context3.sent;
@@ -163,7 +188,7 @@ exports.myProfile = function _callee3(req, res, nxt) {
           }));
 
         case 7:
-          return _context3.abrupt("return", res.status(200).json(_defineProperty({
+          return _context3.abrupt("return", res.status(200).json((_res$status$json = {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
@@ -172,6 +197,7 @@ exports.myProfile = function _callee3(req, res, nxt) {
             gender: user.gender,
             DOB: user.DOB,
             bio: user.bio,
+            idd: userId,
             summary: user.summary,
             city: user.city,
             country: user.country,
@@ -179,7 +205,7 @@ exports.myProfile = function _callee3(req, res, nxt) {
             education: user.education,
             job: user.job,
             posts: user.posts.length
-          }, "posts", user.posts)));
+          }, _defineProperty(_res$status$json, "posts", user.posts), _defineProperty(_res$status$json, "comments", user.comments), _res$status$json)));
 
         case 10:
           _context3.prev = 10;
@@ -637,15 +663,18 @@ exports.createAvatar = function _callee9(req, res, nxt) {
     while (1) {
       switch (_context9.prev = _context9.next) {
         case 0:
-          _context9.prev = 0;
-          _context9.next = 3;
+          console.log(req.body);
+          _context9.prev = 1;
+          debugger; //find user
+
+          _context9.next = 5;
           return regeneratorRuntime.awrap(userModel.findById(req.userId).select('firstName lastName email role bio summary pic socialLinks location job education'));
 
-        case 3:
+        case 5:
           user = _context9.sent;
 
           if (user) {
-            _context9.next = 6;
+            _context9.next = 8;
             break;
           }
 
@@ -653,7 +682,7 @@ exports.createAvatar = function _callee9(req, res, nxt) {
             message: "user not exist"
           }));
 
-        case 6:
+        case 8:
           if (req.file == undefined) {
             pic = data.DOMAIN + 'defaultPhoto.png';
           } else {
@@ -662,19 +691,19 @@ exports.createAvatar = function _callee9(req, res, nxt) {
 
           user.pic = pic; //save in DB
 
-          _context9.next = 10;
+          _context9.next = 12;
           return regeneratorRuntime.awrap(user.save());
 
-        case 10:
+        case 12:
           updatedUser = _context9.sent;
           return _context9.abrupt("return", res.status(200).json({
             // message: "updated successfully",
             user: updatedUser
           }));
 
-        case 14:
-          _context9.prev = 14;
-          _context9.t0 = _context9["catch"](0);
+        case 16:
+          _context9.prev = 16;
+          _context9.t0 = _context9["catch"](1);
 
           if (!_context9.t0.statusCode) {
             _context9.t0.statusCode = 500;
@@ -682,12 +711,12 @@ exports.createAvatar = function _callee9(req, res, nxt) {
 
           nxt(_context9.t0);
 
-        case 18:
+        case 20:
         case "end":
           return _context9.stop();
       }
     }
-  }, null, null, [[0, 14]]);
+  }, null, null, [[1, 16]]);
 };
 
 exports.deleteAvatar = function _callee10(req, res, nxt) {

@@ -40,11 +40,11 @@ const postSchema = new schema({
         required: true,
         enum: ['Product Form' , 'Startup Form']
     },
-    // categoryId: {
-    //     type: schema.Types.ObjectId,
-    //     required: true,
-    //     ref: 'Category'
-    // },
+    categoryId: {
+        type: schema.Types.ObjectId,
+        required: true,
+        ref: 'Category'
+    },
     createdBy: {
         type: schema.Types.ObjectId,
         ref: 'User'

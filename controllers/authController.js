@@ -124,9 +124,10 @@ exports.login = async (req, res, nxt) => {
         }
         const token = await sign(payload, data.SECRET, {expiresIn: "1 day"});
         return res.status(200).json({
-            message: "you're logged in",
-            user: 'welcome ' + user.firstName,
-            data: user.getUserInfo(),
+            // message: "you're logged in",
+            // user: 'welcome ' + user.firstName,
+            // data: user.getUserInfo(),
+            idd: user._id,
             token: `${token}`
         });
     } catch (err) {

@@ -45,6 +45,10 @@ var postSchema = new schema((_ref = {
   type: String,
   required: true,
   "enum": ['Product Form', 'Startup Form']
+}), _defineProperty(_ref, "categoryId", {
+  type: schema.Types.ObjectId,
+  required: true,
+  ref: 'Category'
 }), _defineProperty(_ref, "createdBy", {
   type: schema.Types.ObjectId,
   ref: 'User'

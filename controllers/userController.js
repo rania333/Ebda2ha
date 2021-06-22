@@ -9,13 +9,13 @@ const commentModel = require('../models/commentModel');
 
 exports.updateProfile = async (req, res, nxt) => {
     try {
-        //validation
-        // const errors = await validationResult(req);
-        // if (!errors.isEmpty()) {
-        //     return res.status(422).json({
-        //         errors: errors.array()
-        //     });
-        // }
+        // validation
+        const errors = await validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({
+                errors: errors.array()
+            });
+        }
         //find user
         let user = await userModel.findById(req.userId);
         if (!user) {
@@ -93,13 +93,21 @@ exports.myProfile = async (req, res, nxt) => {``
         const userId = req.userId;
         let user = await userModel.findById(userId,
             'firstName lastName email verified role pic gender DOB summary bio socialLinks location job education city address country')
-            .populate('posts');
+            .populate({
+                path: 'posts',
+                populate:{
+                    path: 'categoryId',
+                    model: 'Category',
+                    select: 'name'
+                }
+            })
         if (!user) {
             return res.status(404).json({
                 message: "user not exist"
             });
         } 
         return res.status(200).json({
+          
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
@@ -108,6 +116,7 @@ exports.myProfile = async (req, res, nxt) => {``
             gender: user.gender,
             DOB: user.DOB,
             bio: user.bio,
+            idd: userId,
             summary: user.summary,
             city: user.city,
             country: user.country,
@@ -116,7 +125,9 @@ exports.myProfile = async (req, res, nxt) => {``
             job: user.job,
             posts: user.posts.length,
             posts: user.posts,
+            // id: user._id,
             // comments: user.comments.length
+             comments: user.comments
             // message: "you fetched the user successfully",
             // user: user
         });
@@ -333,7 +344,10 @@ exports.changePass = async (req, res, nxt) => {
 }
 
 exports.createAvatar = async (req, res, nxt) => {
+    console.log(req.body)
     try {
+       
+        debugger
         //find user
         let user = await userModel.findById(req.userId)
         .select('firstName lastName email role bio summary pic socialLinks location job education' );

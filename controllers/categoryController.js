@@ -8,7 +8,7 @@ exports.getAllCategory = async(req, res, next) => {
         .populate('adminId', 'firstName lastName')
         res.status(200).json({
             // message: 'Fetched all data successfully',
-            categories: categories
+            categories
         })
     }catch(err) {
         if (!err.statusCode) {
