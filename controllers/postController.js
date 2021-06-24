@@ -266,10 +266,10 @@ exports.filter = async (req, res, nxt) => {
             });
         }
         //hold data
-        const category = req.body.categoryId;
+        const category = req.query.categoryId;
         var arr = [];
         const page = req.query.page ? parseInt(req.query.page) : 1; //for pagination
-        const posts = await postModel.find({categoryId: category},{approved: true}).populate('createdBy',
+        const posts = await postModel.find({$and:[{categoryId: category},{approved: true}]}).populate('createdBy',
         {firstName:1, lastName:1})
         .populate('categoryId', {name:  1})
         .populate({
@@ -293,8 +293,8 @@ exports.filter = async (req, res, nxt) => {
         //return posts
         return res.status(200).json({
             message: 'the posts are retrieved successfully',
-            search_Result: arr.length,
-            posts: posts.length>0 ? posts : "No Posts Found"
+            search_Result: posts.length,
+            posts: posts.length>0 ? posts : "No Posts Found",
         })
     } catch(err) {
         if (!err.statusCode) {

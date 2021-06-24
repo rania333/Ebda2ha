@@ -8,7 +8,7 @@ const isAdmin = require('../middleware/isAdmin');
 const router = express.Router(); //mini app
 
 router.put('/updateProfile', isAuth, userController.updateProfile);
-router.get('/getUsers', isAuth, isAdmin, userController.getAllUsers); //for admin only
+router.get('/getUsers', isAuth, userController.getAllUsers); //for admin only
 router.get('/filter', isAuth,validation.filter , userController.filter); //x validation hena x l input
 router.get('/', isAuth, userController.myProfile);//l profile bta3i ana 
 router.get('/:userId', isAuth, userController.getUser); //profile user mo3yn

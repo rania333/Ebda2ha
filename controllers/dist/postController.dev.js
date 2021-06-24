@@ -497,15 +497,17 @@ exports.filter = function _callee6(req, res, nxt) {
 
         case 6:
           //hold data
-          category = req.body.categoryId;
+          category = req.query.categoryId;
           arr = [];
           page = req.query.page ? parseInt(req.query.page) : 1; //for pagination
 
           _context6.next = 11;
           return regeneratorRuntime.awrap(postModel.find({
-            categoryId: category
-          }, {
-            approved: true
+            $and: [{
+              categoryId: category
+            }, {
+              approved: true
+            }]
           }).populate('createdBy', {
             firstName: 1,
             lastName: 1
@@ -534,7 +536,7 @@ exports.filter = function _callee6(req, res, nxt) {
 
           return _context6.abrupt("return", res.status(200).json({
             message: 'the posts are retrieved successfully',
-            search_Result: arr.length,
+            search_Result: posts.length,
             posts: posts.length > 0 ? posts : "No Posts Found"
           }));
 
